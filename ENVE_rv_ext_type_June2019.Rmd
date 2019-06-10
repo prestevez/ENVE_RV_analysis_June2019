@@ -3662,9 +3662,9 @@ Also generate a numerical variable adjusting the lag value.
 
 enve_lag_nm_sem1 %>%
     mutate(
-        lag_extincs_adj = capadjust(lag_extincs, extincs, 7)*100,
-        lag_rmt_adj = capadjust(lag_remote, extincs + lag_extincs - lag_remote, 7)*100,
-        lag_inp_adj = capadjust(lag_inperson, extincs + lag_extincs - lag_inperson, 7)*100
+        lag_extincs_adj = capadjust(lag_extincs, extincs, 7),
+        lag_rmt_adj = capadjust(lag_remote, extincs + lag_extincs - lag_remote, 7),
+        lag_inp_adj = capadjust(lag_inperson, extincs + lag_extincs - lag_inperson, 7)
     ) -> enve_lag_nm_sem1
 
 
@@ -9680,4 +9680,4 @@ print(paste("the script took", round(time[3]/60,2),
               "minutes to run.", sep=" "))
 ```
 
-# Referencias
+# References
