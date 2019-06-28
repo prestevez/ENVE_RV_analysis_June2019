@@ -1,3 +1,7 @@
 releases/
 results/
 .DS_Store
+*.dbf
+notes*
+figure/
+coef_results/
