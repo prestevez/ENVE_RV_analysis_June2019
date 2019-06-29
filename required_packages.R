@@ -20,4 +20,7 @@ packages <- c("devtools",
               "texreg",
               "arsenal",
               "bbmle",
-              "gridExtra")
+              "gridExtra",
+              "scales",
+              "victim"
+          )

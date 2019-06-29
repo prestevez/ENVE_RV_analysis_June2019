@@ -1518,8 +1518,6 @@ coef_csv(rmt_logit)
 Now do the concentration models (truncated count models)
 
 - Concentration models
-    - tnb vs tp (previous suggest NB)
-    - glmmADMB vs glmmTMB
 
 ```{r remote-concentration-models}
 
@@ -1582,14 +1580,16 @@ AICtab(rmt_mtnb_b, rmt_mtnb)
 rmt_mtp_pars_90 <- update(rmt_mtp, . ~ subsector_new +
                             size +
                             mylog(drogas, mean_drogas) +
-                            scale(General, mean_General, FALSE))
+                            scale(General, mean_General, FALSE) +
+                            (1|NOM_ENT))
 
 countsummary(rmt_mtp_pars_90)
 
 # alpha 0.05
 
 rmt_mtp_pars_95 <- update(rmt_mtp, . ~ subsector_new +
-                            size)
+                            size +
+                            (1|NOM_ENT))
 
 countsummary(rmt_mtp_pars_95)
 
@@ -1600,14 +1600,16 @@ compare_nested(rmt_mtp_pars_95, rmt_mtp_pars_90, rmt_mtp)
 rmt_mtnb_pars_90 <- update(rmt_mtnb, . ~ subsector_new +
                             size +
                             mylog(drogas, mean_drogas) +
-                            scale(General, mean_General, FALSE))
+                            scale(General, mean_General, FALSE) +
+                            (1|NOM_ENT))
 
 countsummary(rmt_mtnb_pars_90)
 
 # alpha 0.05
 
 rmt_mtnb_pars_95 <- update(rmt_mtnb, . ~ subsector_new +
-                            size)
+                            size +
+                            (1|NOM_ENT))
 
 countsummary(rmt_mtnb_pars_95)
 
@@ -1632,6 +1634,10 @@ countsummary(rmt_tnb_pars_95)
 
 compare_nested(rmt_tnb_pars_95, rmt_mtnb_pars_95)
 
+coef_csv(rmt_mtnb)
+coef_csv(rmt_mtnb_pars_90)
+coef_csv(rmt_mtnb_pars_95)
+
 ```
 
 
@@ -1648,7 +1654,7 @@ General strategy for the models
 ```{r in-person-incidence}
 
 
-inp_f <- update(rmt_f, inperson_wocp ~ . )
+inp_f <- update(rmt_f, inperson_wocp ~ poly(bribes, 2, raw = TRUE) + . - mylog (bribes))
 
 inp_p <- glmmTMB(inp_f,
                     family = "poisson",
@@ -1666,7 +1672,7 @@ compare_nested(inp_p, inp_nb)
 
 ## Multilevel poisson
 
-inp_mp <- update(inp_p, . ~ . + (1|CVE_ENT))
+inp_mp <- update(inp_p, add_nom)
 
 countsummary(inp_mp)
 
@@ -1684,45 +1690,93 @@ compare_nested(inp_mp, inp_mnb)
 
 
 ## Try different specification for bribes
+# log bribes
 
-inp_nb_lb <- update(inp_nb, add_lb)
-
-countsummary(inp_nb_lb)
-
-AICtab(inp_nb, inp_nb_lb)
-
-compare_alphas(inp_nb, inp_nb_lb)
-
-inp_mnb_lb <- update(inp_mnb, add_lb)
+inp_mnb_lb <- update(inp_mnb, . ~ mylog(bribes) + . -
+                        poly(bribes, 2, raw = TRUE))
 
 countsummary(inp_mnb_lb)
 
-AICtab(inp_mnb_lb, inp_mnb)
+AICtab(inp_mnb, inp_mnb_lb)
 
-# Polynomial bribes?
+#  linear bribes
 
-inp_nb_pb <- update(inp_nb, add_pb)
+inp_mnb_b <- update(inp_mnb_lb, . ~ bribes + . - mylog(bribes))
 
-countsummary(inp_nb_pb)
+countsummary(inp_mnb_b)
 
-AICtab (inp_nb_pb, inp_nb, inp_nb_lb)
+AICtab(inp_mnb, inp_mnb_lb, inp_mnb_b)
 
-compare_alphas(inp_nb, inp_nb_pb)
+### Test excluding insignificant variables previously identified
+# Significant vars:
+#           bribes      p<0.001
+#           armas       p<0.05
+#           drogas      p<0.05
+#           yearsquant  p<0.1
+#           subsector   p<0.1
 
+# alpha 0.1
+inp_mnb_pars_90 <- update(inp_mnb, . ~ poly(bribes, 2, raw = TRUE) +
+                                    yearsquant +
+                                    subsector_new +
+                                    mylog(armas, mean_armas) +
+                                    mylog(drogas, mean_drogas) +
+                                    (1|NOM_ENT)
+                                )
+countsummary(inp_mnb_pars_90)
 
-inp_mnb_pb <- update(inp_mnb, add_pb)
+# alpha 0.05
 
-countsummary(inp_mnb_pb)
+inp_mnb_pars_95 <- update(inp_mnb_pars_90, . ~ . - yearsquant - subsector_new)
 
-compare_alphas(inp_mnb, inp_mnb_pb)
+countsummary(inp_mnb_pars_95)
 
-AICtab(inp_mnb, inp_mnb_pb, inp_mnb_lb)
+compare_nested(inp_mnb_pars_95, inp_mnb_pars_90, inp_mnb)
 
+# compare to poisson
+
+# alpha 0.1
+inp_mp_pars_90 <- update(inp_mnb_pars_90, family = "poisson")
+
+countsummary(inp_mp_pars_90)
+
+compare_nested(inp_mp_pars_90, inp_mnb_pars_90)
+
+# alpha 0.05
+
+inp_mp_pars_95 <- update(inp_mp_pars_90, . ~ . - yearsquant - subsector_new)
+
+countsummary(inp_mp_pars_95)
+
+compare_nested(inp_mp_pars_95, inp_mnb_pars_95)
+
+## single level nb
+
+# alpha 0.1
+inp_nb_pars_90 <- update(inp_mnb_pars_90, . ~ . - (1|NOM_ENT))
+
+countsummary(inp_nb_pars_90)
+
+compare_nested(inp_nb_pars_90, inp_mnb_pars_90)
+
+# alpha 0.05
+
+inp_nb_pars_95 <- update(inp_mnb_pars_95, . ~ . - (1|NOM_ENT))
+
+countsummary(inp_nb_pars_95)
+
+compare_nested(inp_nb_pars_95, inp_mnb_pars_95)
+
+## save to csv
+
+coef_csv(inp_mnb)
+coef_csv(inp_mnb_pars_90)
+coef_csv(inp_mnb_pars_95)
 
 ```
 
 - Prevalence models
-    - Single level vs multilevel
+
 
 ```{r in-person-prevalence}
 
@@ -1734,42 +1788,76 @@ countsummary(inp_logit)
 
 # multilevel
 
-inp_mlogit <- update(inp_logit, . ~ . + (1|CVE_ENT))
+inp_mlogit <- update(inp_logit, add_nom)
 
 countsummary(inp_mlogit)
 
 compare_nested(inp_logit, inp_mlogit)
 
 
-
 # bribes specifications
 
-inp_logit_lb <- update(inp_logit, add_lb)
-
-countsummary(inp_logit_lb)
-
-AICtab(inp_logit, inp_logit_lb)
-
-inp_mlogit_lb <- update(inp_mlogit, add_lb)
+inp_mlogit_lb <- update(inp_mlogit, . ~ mylog(bribes) + . -
+                        poly(bribes, 2, raw = TRUE) )
 
 countsummary(inp_mlogit_lb)
 
 AICtab(inp_mlogit, inp_mlogit_lb)
 
-### Polynomial bribes
+inp_mlogit_b <- update(inp_mlogit_lb,  . ~ + bribes + . -mylog(bribes))
 
-inp_logit_pb <- update(inp_logit, add_pb)
+countsummary(inp_mlogit_b)
 
-countsummary(inp_logit_pb)
+AICtab(inp_mlogit, inp_mlogit_lb, inp_mlogit_b)
 
+### Test excluding insignificant variables previously identified
+# Significant vars:
+#           bribes      p<0.001
+#           armas       p<0.05
+#           drogas      p<0.01
+#           yearsquant  p<0.05
+#           subsector   NS but keep for comparison
 
-AICtab(inp_logit, inp_logit_lb, inp_logit_pb)
+# including subsector
+inp_mlogit_pars_90 <- update(inp_mlogit, . ~ poly(bribes, 2, raw = TRUE) +
+                                    yearsquant +
+                                    subsector_new +
+                                    mylog(armas, mean_armas) +
+                                    mylog(drogas, mean_drogas) +
+                                    (1|NOM_ENT)
+                                )
+countsummary(inp_mlogit_pars_90)
 
-inp_mlogit_pb <- update(inp_mlogit, add_pb)
+# alpha 0.05
 
-countsummary(inp_mlogit_pb)
+inp_mlogit_pars_95 <- update(inp_mlogit_pars_90, . ~ . - subsector_new)
 
-AICtab(inp_mlogit, inp_mlogit_lb, inp_mlogit_pb)
+countsummary(inp_mlogit_pars_95)
+
+compare_nested(inp_mlogit_pars_95, inp_mlogit_pars_90, inp_mlogit)
+
+## single level
+
+# including subsector
+inp_logit_pars_90 <- update(inp_mlogit_pars_90, . ~ . - (1|NOM_ENT))
+
+countsummary(inp_logit_pars_90)
+
+compare_nested(inp_logit_pars_90, inp_mlogit_pars_90)
+
+# alpha 0.05
+
+inp_logit_pars_95 <- update(inp_mlogit_pars_95, . ~ . - (1|NOM_ENT))
+
+countsummary(inp_logit_pars_95)
+
+compare_nested(inp_logit_pars_95, inp_mlogit_pars_95)
+
+## save to csv
+
+coef_csv(inp_mlogit)
+coef_csv(inp_mlogit_pars_90)
+coef_csv(inp_mlogit_pars_95)
 
 
 ```
@@ -1783,14 +1871,17 @@ AICtab(inp_mlogit, inp_mlogit_lb, inp_mlogit_pb)
 
 inp_vic <-  subset(enve_plus_nona, inperson_wocp > 0)
 
-inp_tp <- update(inp_p, family = "truncated_poisson",
-                    data = inp_vic)
+inp_tp <- glmmadmb(inp_f,
+                    family = "truncpoiss",
+                    data = inp_vic,
+                    zeroInflation = FALSE,
+                    admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE), extra.args = "-ndi 60000")
 
 countsummary(inp_tp)
 
 ## truncated_negbin
 
-inp_tnb <- update(inp_tp, family = "truncated_nbinom2")
+inp_tnb <- update(inp_tp, family = "truncnbinom")
 
 countsummary(inp_tnb)
 
@@ -1798,7 +1889,7 @@ compare_nested(inp_tp, inp_nb)
 
 ## Multilevel
 
-inp_mtp <- update(inp_tp, . ~ . + (1|CVE_ENT))
+inp_mtp <- update(inp_tp, add_nom)
 
 countsummary(inp_mtp)
 
@@ -1806,8 +1897,7 @@ compare_nested(inp_tp, inp_mtp)
 
 ## multilevel negative binomial
 
-inp_mtnb <- update(inp_tp, . ~ . + (1|CVE_ENT),
-    family = "truncated_nbinom2")
+inp_mtnb <- update(inp_tnb, add_nom)
 
 countsummary(inp_mtnb)
 
@@ -1815,80 +1905,31 @@ compare_nested(inp_mtp, inp_mtnb)
 
 compare_nested(inp_tnb, inp_mtnb)
 
-### Bribe specifications
+# ### Test bribes functional form?
+# No need, bribes not significant
 
-## add log bribes formula
+### Test excluding insignificant variables previously identified
+# Significant variables:
+#           subsector_new (p<0.1)
 
-inp_tnb_lb <- update(inp_tnb, add_lb)
+inp_tp_pars <- update(inp_tp, . ~ subsector_new)
 
-countsummary(inp_tnb_lb)
+countsummary(inp_tp_pars)
 
-AICtab(inp_tnb, inp_tnb_lb)
+compare_nested(inp_tp_pars, inp_tp)
 
-inp_mtnb_lb <- update(inp_mtnb, add_lb)
+## multilevel
 
-countsummary(inp_mtnb_lb)
+inp_mtp_pars <- update(inp_mtp, . ~ subsector_new + (1|NOM_ENT))
 
-AICtab(inp_mtnb, inp_mtnb_lb)
+countsummary(inp_mtp_pars)
 
-## add bribe polynomial
+compare_nested(inp_mtp_pars, inp_mtp)
 
-add_pb <- . ~ . - bribes + poly(bribes, 2)
-
-inp_tnb_pb <- update(inp_tnb, add_pb)
-
-countsummary(inp_tnb_pb)
-
-AICtab(inp_tnb, inp_tnb_pb)
-
-inp_mtnb_pb <- update(inp_mtnb, add_pb)
-
-countsummary(inp_mtnb_pb)
-
-AICtab(inp_mtnb, inp_mtnb_pb)
-
-
-#compare to glmmADMB
-
-inp_tp_admb <- glmmadmb(formula(inp_tp),
-                        family = "truncpoiss",
-                        data = inp_vic,
-                        zeroInflation = FALSE,
-                        admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE), extra.args = "-ndi 60000")
-
-
-countsummary(inp_tp_admb)
-
-compare_nested(inp_tp, inp_tp_admb)
-
-## admb nbinom
-
-inp_tnb_admb <- update(inp_tp_admb, family = "truncnbinom")
-
-countsummary(inp_tnb_admb)
-
-compare_nested(inp_tp_admb, inp_tnb_admb)
-
-compare_nested(inp_tnb, inp_tnb_admb)
-
-## admb multilevel Truncated poisson
-
-inp_mtp_admb <- update(inp_tp_admb, . ~ . + (1|NOM_ENT))
-
-countsummary(inp_mtp_admb)
-
-compare_nested(inp_tp_admb, inp_mtp_admb)
-
-## ADMB multielvel Truncated negbin
-
-inp_mtnb_admb <- update(inp_tnb_admb, . ~ . + (1|NOM_ENT))
-
-countsummary(inp_mtnb_admb)
-
-compare_nested(inp_mtp_admb, inp_mtnb_admb)
-
-compare_nested(inp_tnb_admb, inp_mtnb_admb)
-
+coef_csv(inp_tp)
+coef_csv(inp_mtp)
+coef_csv(inp_tp_pars)
+coef_csv(inp_mtp_pars)
 
 ```
 
@@ -1903,9 +1944,9 @@ General strategy for the models
 
 ```{r piso-prevalence}
 
+piso_f <- update(rmt_f, mkbin(piso) ~ . )
 
-piso_logit <- update(inp_p, mkbin(piso) ~ . ,
-                    family = "binomial")
+piso_logit <- glmmTMB(piso_f, data = enve_plus_nona, family = "binomial")
 
 countsummary(piso_logit)
 
@@ -1917,36 +1958,61 @@ countsummary(piso_mlogit)
 
 compare_nested(piso_logit, piso_mlogit)
 
-
-
 # bribes specifications
 
-piso_logit_lb <- update(piso_logit, add_lb)
-
-countsummary(piso_logit_lb)
-
-AICtab(piso_logit, piso_logit_lb)
-
-piso_mlogit_lb <- update(piso_mlogit, add_lb)
+piso_mlogit_b <- update(piso_mlogit, . ~ bribes + . - mylog(bribes))
 
 countsummary(piso_mlogit_lb)
 
 AICtab(piso_mlogit, piso_mlogit_lb)
 
-### Polynomial bribes
+### Test excluding insignificant variables previously identified
+# Significant variables:
+#           log(bribes) (p<0.05)
+#           general     (p<0.01)
+#           derecho     (p<0.001 in logit)
 
-piso_logit_pb <- update(piso_logit, add_pb)
+# multilevel
+# with derecho
+piso_mlogit_pars_der <- update(piso_mlogit, . ~ mylog(bribes) +
+                                scale(General, mean_General, FALSE) +
+                                scale(Derecho, mean_General, FALSE)
+                            )
 
-countsummary(piso_logit_pb)
+countsummary(piso_mlogit_pars_der)
 
+compare_nested(piso_mlogit_pars_der, piso_mlogit)
 
-AICtab(piso_logit, piso_logit_lb, piso_logit_pb)
+# without derecho
 
-piso_mlogit_pb <- update(piso_mlogit, add_pb)
+piso_mlogit_pars_95 <- update(piso_mlogit_pars_der, . ~ . -
+                                scale(Derecho, mean_General, FALSE)
+                            )
 
-countsummary(piso_mlogit_pb)
+countsummary(piso_mlogit_pars_95)
 
-AICtab(piso_mlogit, piso_mlogit_lb, piso_mlogit_pb)
+compare_nested(piso_mlogit_pars_95, piso_mlogit_pars_der, piso_mlogit)
+
+# single level
+
+piso_logit_pars_der <- update(piso_logit, . ~ mylog(bribes) +
+                                scale(General, mean_General, FALSE) +
+                                scale(Derecho, mean_General, FALSE)
+                            )
+
+countsummary(piso_logit_pars_der)
+
+compare_nested(piso_logit_pars_der, piso_mlogit_pars_der)
+
+# without derecho
+
+piso_logit_pars_95 <- update(piso_logit_pars_der, . ~ . -
+                                scale(Derecho, mean_General, FALSE)
+                            )
+
+countsummary(piso_logit_pars_95)
+
+compare_nested(piso_logit_pars_95, piso_mlogit_pars_95)
 
 ```
 
@@ -1957,38 +2023,25 @@ Several things to improve over previous iteration.
 
 Time course analysis:
 
-- Distinguish by extortion type
-- Control time-window effect by using only repeats that occurred the second semester
-- Fit a smoother, possibly:
-    - $E(y|x) = e^{\beta_0 + \beta_1 x}$
+Do EDA of victimisation frequency per month and semester
 
-Do extensive EDA to understand if any variable has complete or quasi-complete separation (business and state level)
+Redo timecourse plots, make sure they are correctly saved in the figure folder. Also add labels for every month.
 
-Modelling:
+When excluding semester wise observations that have reached the cap, mention how many had to be excluded.
 
-- Model extincs, remote, and inperson_wocp
-    - Null vs Null + ED
-    - Null vs Full
-    - Full vs Full + ED
-    - Test Poisson and NB
-    - Test single level vs multilevel
-    - Test whether capping adjustments are needed to ED
-    - Use past compliance as ED IV
-        - Maybe use categories: Not victimised, victimised but not complied, victim and complied
+Fix case compliance variable, change OR for AND
 
+After lag adjust, fit to
+
+Do plots of lag adjusted to get a sense of how many there are.
+
+Also do a scatter plot vs unadjusted? (can exclude zeroes)
+
+Fix compliance formulas
+
+As previous chapter showed incidence not best approach, maybe focus only on prevalence vs concentration here. Fit only relevant variables and focus on event dependence.
 
 ## Time course
-
-In this section, the goal is to attempt to calculate the time-course of repeat victimisation. In essence, the time course is the time elapsed between victimisation events against the same target. The time course is most often presented as a distribution, similar to survival curves.
-
-While I do not aim to build survival time-to-event models, it is a plausible alternative for future research, i.e. they could be used to understand the time-to-event curves for compliant vs non-compliant victims in a first event.
-
-- Distinguish by extortion type
-- Control time-window effect by using only repeats that occurred the second semester
-- Fit a smoother, possibly:
-    - $E(y|x) = e^{\beta_0 + \beta_1 x}$
-- Calculate a victimisation time course for time since compliance
-- Use prop for plots, it makes the curves comparable, and doesn't affect the fitting.
 
 
 ```{r time-course}
@@ -1997,7 +2050,132 @@ table(enve_nona$month, useNA = "ifany")
 
 sum(table(enve_nona$month, useNA = "ifany"))
 
+enve_nona %>%
+    filter(month < 13) %$%
+    table(month, useNA = "ifany") %>% sum
 
+enve_nona %>%
+    filter(month < 13) %$%
+    table(month, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %$%
+    table(month, useNA = "ifany") %>%
+    chisq.test(.)
+
+
+## Tables and tests by type
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "Remote") %$%
+    table(month, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "Remote") %$%
+    table(month, useNA = "ifany")%>%
+    chisq.test
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "In person") %$%
+    table(month, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "In person") %$%
+    table(month, useNA = "ifany")%>%
+    chisq.test
+
+# plots
+enve_nona %>%
+    filter(month < 13) %>%
+    ggplot(aes(month)) +
+    geom_bar() +
+    theme_bw() +
+    scale_x_continuous("Month", breaks = 1:12) +
+    ylab("Extortion incidents") +
+    ggtitle("Monthly count of extortion incidents")
+
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp != "Other") %>%
+    ggplot(aes(month, fill = extortion_type_wocp)) +
+    geom_bar() +
+    theme_bw() +
+    scale_x_continuous("Month", breaks = 1:12) +
+    ylab("Extortion incidents") +
+    ggtitle("Extortion incidents (monthly)") +
+    facet_wrap(~ extortion_type_wocp, scales = "free_y") +
+    scale_fill_manual(values = c("#E69F00", "#0072B2")) +
+    theme(legend.position = "none")
+
+ggsave(filename = "figure/monthly_counts_extortion.pdf", width = 7, height = 4)
+
+
+# events per semester
+
+enve_nona %>%
+    filter(month < 13) %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    ))%$%
+    table(sem, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    ))%$%
+    table(sem, useNA = "ifany") %>%
+    chisq.test
+
+### per type
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "In person") %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    )) %$%
+    table(sem, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "In person") %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    ))%$%
+    table(sem, useNA = "ifany") %>%
+    chisq.test
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "Remote") %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    )) %$%
+    table(sem, useNA = "ifany")
+
+enve_nona %>%
+    filter(month < 13) %>%
+    filter(extortion_type_wocp == "Remote") %>%
+    mutate(sem = case_when(
+        month < 7   ~ 0,
+        month >= 7  ~ 1
+    ))%$%
+    table(sem, useNA = "ifany") %>%
+    chisq.test
+
+
+#### TC
 enve_nona %>%
     filter(month < 13) %>%
     #select(CVE_UNICA, month) %>%
@@ -2055,9 +2233,11 @@ half_life(tc_smooth_log)
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom") -> tc1)
+            legend.position = "bottom") +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent) -> tc1)
 
-ggsave(tc1, filename = "time_course_full.pdf")
+ggsave(tc1, filename = "figure/time_course_full.pdf")
 
 
 # Use filter to select second semester
@@ -2070,7 +2250,7 @@ mth_tc %>%
     data.frame %>%
     transmute(time = as.integer(as.character(tc)),
                 count = Freq,
-                prop = count/sum(count)) -> tc_df_6m
+                prop = count/sum(count))  -> tc_df_6m
 
 tc_df_6m
 
@@ -2115,9 +2295,11 @@ half_life(tc_6m_smooth)
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom") -> tc2)
+            legend.position = "bottom") +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent) -> tc2)
 
-ggsave(tc2, file = "time_course_6m_window.pdf")
+ggsave(tc2, file = "figure/time_course_6m_window.pdf")
 ```
 
 
@@ -2171,7 +2353,9 @@ tc_remote_tb %>%
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom")  +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent)
 
 
 
@@ -2211,7 +2395,9 @@ tc_remote_6m_tb %>%
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom") +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent)
 
 
 ```
@@ -2268,7 +2454,9 @@ tc_inp_tb %>%
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom") +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent)
 
 
 
@@ -2308,7 +2496,9 @@ tc_inp_6m_tb %>%
     xlab("Months between repeat events") +
     ylab("Proportion") +
     theme(legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom") +
+            scale_x_continuous(breaks = 0:11) +
+            scale_y_continuous(labels = scales::percent)
 
 
 ```
@@ -2336,9 +2526,11 @@ tc_remote_tb %>%
     ylab("Proportion") +
     theme(legend.title = element_blank(),
             legend.position = "bottom") +
-    facet_wrap(~ Type) -> tc_both_p1)
+    facet_wrap(~ Type)  +
+    scale_x_continuous(breaks = 0:11) +
+    scale_y_continuous(labels = scales::percent)  -> tc_both_p1)
 
-ggsave(tc_both_p1, file = "tc_both_p1.pdf",
+ggsave(tc_both_p1, file = "figure/tc_both_p1.pdf",
         width = 8, height = 4)
 
 ## using 6m time window
@@ -2360,9 +2552,11 @@ tc_remote_6m_tb %>%
     ylab("Proportion") +
     theme(legend.title = element_blank(),
             legend.position = "bottom") +
-    facet_wrap(~ Type) -> tc_both_6m_p1)
+    facet_wrap(~ Type)  +
+    scale_x_continuous(breaks = 0:11) +
+    scale_y_continuous(labels = scales::percent)  -> tc_both_6m_p1)
 
-ggsave(tc_both_6m_p1, file = "tc_both_6m_p1.pdf",
+ggsave(tc_both_6m_p1, file = "figure/tc_both_6m_p1.pdf",
         width = 7, height = 4)
 
 ```
@@ -2390,7 +2584,7 @@ Models for lag dependence should exclude those observations where it is impossib
 - extincs (in sem 2) is 7
 - lag_extincs (in sem1) is 7
 
-Previos itearations of the analysis suggest that there are some cases where this has happens.
+Previous iterations of the analysis suggest that there are some cases where this happens.
 
 In extincs there are 6 cases that are equal to 7, similarly there are 6 cases where lag_extincs is 7.
 
@@ -2715,24 +2909,133 @@ summary(eda_state_inp_repeat_ed,
 
 ```
 
-A revision of the results from previous iterations suggest that for inperson extortions, size medium + transport likely result in complete separation. Using the subsector_new category should avoid this.
+Plot and table distribution
 
-Overall, it appears that glmmTMB models for truncated nb have trouble estimating the intercept, the same does not happen in truncated poisson models. However, it is likely that some of the categories will have very few observations for repeat inperson incidents.
+
+```{r ed-plots-tables}
+
+# Semester 1
+
+enve_lag_nm_sem1 %>%
+    ungroup %>%
+    select(remote, inperson) %>%
+    melt %>%
+    mutate(variable = fct_recode(variable,
+            Remote = "remote",
+            "In person" = "inperson")) %>%
+    group_by(variable) %>%
+    ggplot(aes(value, fill =  variable)) +
+    geom_bar() +
+    scale_y_sqrt("Businesses") +
+    scale_x_continuous(breaks = 0:7) +
+    theme_bw() +
+    xlab("Incidents per business") +
+    facet_wrap(~ variable, scales = "free_y") +
+    ggtitle("Distributon of extortion by type (capped at 7)",
+            subtitle = "Second semester of 2014") +
+    scale_fill_manual(values = c("#E69F00", "#0072B2")) +
+    theme(legend.position = "none")
+
+ggsave(filename = "figure/capped_dist_sqrt_sem1.pdf", width = 7, height = 4)
+
+
+enve_lag_nm_sem1 %>%
+    ungroup %>%
+    select(remote, inperson) %>%
+    melt %>%
+    mutate(variable = fct_recode(variable,
+            Remote = "remote",
+            "In person" = "inperson")) %>%
+    group_by(variable) %>%
+    ggplot(aes(value, fill =  variable)) +
+    geom_bar() +
+    scale_y_continuous("Businesses", trans = "log1p") +
+    scale_x_continuous(breaks = 0:7) +
+    theme_bw() +
+    xlab("Incidents per business") +
+    facet_wrap(~ variable, scales = "free_y") +
+    ggtitle("Distributon of extortion by type (capped at 7)",
+            subtitle = "Second semester of 2014") +
+    scale_fill_manual(values = c("#E69F00", "#0072B2")) +
+    theme(legend.position = "none")
+
+ggsave(filename = "figure/capped_dist_log1p_sem1.pdf", width = 7, height = 4)
+
+
+# Semester 2
+
+enve_lag_nm_sem1 %>%
+    ungroup %>%
+    select(lag_remote, lag_inperson) %>%
+    melt %>%
+    mutate(variable = fct_recode(variable,
+            Remote = "lag_remote",
+            "In person" = "lag_inperson")) %>%
+    group_by(variable) %>%
+    ggplot(aes(value, fill =  variable)) +
+    geom_bar() +
+    scale_y_sqrt("Businesses") +
+    scale_x_continuous(breaks = 0:7) +
+    theme_bw() +
+    xlab("Incidents per business") +
+    facet_wrap(~ variable, scales = "free_y") +
+    ggtitle("Distributon of extortion by type (capped at 7)",
+            subtitle = "First semester of 2014") +
+    scale_fill_manual(values = c("#E69F00", "#0072B2")) +
+    theme(legend.position = "none")
+
+ggsave(filename = "figure/capped_dist_sqrt_sem0.pdf", width = 7, height = 4)
+
+
+enve_lag_nm_sem1 %>%
+    ungroup %>%
+    select(lag_remote, lag_inperson) %>%
+    melt %>%
+    mutate(variable = fct_recode(variable,
+            Remote = "lag_remote",
+            "In person" = "lag_inperson")) %>%
+    group_by(variable) %>%
+    ggplot(aes(value, fill =  variable)) +
+    geom_bar() +
+    scale_y_continuous("Businesses", trans = "log1p") +
+    scale_x_continuous(breaks = 0:7) +
+    theme_bw() +
+    xlab("Incidents per business") +
+    facet_wrap(~ variable, scales = "free_y") +
+    ggtitle("Distributon of extortion by type (capped at 7)",
+            subtitle = "First semester of 2014") +
+    scale_fill_manual(values = c("#E69F00", "#0072B2")) +
+    theme(legend.position = "none")
+
+ggsave(filename = "figure/capped_dist_log1p_sem0.pdf", width = 7, height = 4)
+
+## tables
+
+enve_lag_nm_sem1 %$%
+    victim_table(remote, "pandoc")
+
+enve_lag_nm_sem1 %$%
+    victim_table(lag_remote, "pandoc")
+
+enve_lag_nm_sem1 %$%
+    victim_table(inperson, "pandoc")
+
+enve_lag_nm_sem1 %$%
+    victim_table(lag_inperson, "pandoc")
+
+
+```
+
 
 ### Modelling
 
 Modelling:
 
-- Model extincs, remote, and inperson_wocp
-    - Null vs Null + ED
-    - Null vs Full
-    - Full vs Full + ED
-    - Null + ED vs Full + ED
-    - Test Poisson and NB
-    - Test single level vs multilevel
-    - Test whether capping adjustments are needed to ED
-    - Use past compliance as ED IV
-        - Maybe use categories: Not victimised, victimised but not complied, victim and complied
+- Prevalence
+- Concentration
+
+- Fit full, null and restricted model.
+- Do checks on restricted models.
 
 Generate a compliance categorical (Not victimised, victimised but not complied, complied)
 
