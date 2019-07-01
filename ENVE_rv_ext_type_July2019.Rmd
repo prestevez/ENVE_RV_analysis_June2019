@@ -3044,7 +3044,7 @@ Generate a compliance categorical (Not victimised, victimised but not complied, 
 case_compliance <- function(x, y){
     a <- case_when(
         x == 0          ~ "Not victim",
-        x > 0 | y == 0  ~ "Victim, not comp.",
+        x > 0 & y == 0  ~ "Victim, not comp.",
         y > 0           ~ "Complied"
     )
     factor(a, levels = c("Not victim", "Victim, not comp.", "Complied"))
@@ -3081,16 +3081,14 @@ enve_lag_nm_sem1 %>%
 
 
 enve_lag_nm_sem1 %$%
-    table(lag_extincs_adj)
+    table(lag_extincs_adj, useNA = "ifany")
 
 enve_lag_nm_sem1 %$%
-    table(lag_rmt_adj)
+    table(lag_rmt_adj, useNA = "ifany")
 
 enve_lag_nm_sem1 %$%
-    table(lag_inp_adj)
+    table(lag_inp_adj, useNA = "ifany")
 
-enve_lag_nm_sem1 %$%
-    anyNA(lag_extincs_adj)
 
 enve_lag_nm_sem1 %$%
     anyNA(lag_rmt_adj)
@@ -3098,17 +3096,11 @@ enve_lag_nm_sem1 %$%
 enve_lag_nm_sem1 %$%
     anyNA(lag_inp_adj)
 
+enve_lag_nm_sem1 %>%
+    drop_na -> enve_lag_nm_sem1_nona
 
-enve_lag_nm_sem1 %$%
-    any(is.infinite(lag_extincs_adj))
-
-enve_lag_nm_sem1 %$%
-    any(is.infinite(lag_rmt_adj))
-
-enve_lag_nm_sem1 %$%
-    any(is.infinite(lag_inp_adj))
-
-## There should not be any infinites
+nrow(enve_lag_nm_sem1)
+nrow(enve_lag_nm_sem1_nona)
 
 
 ```
@@ -3119,7 +3111,7 @@ EDA of the new variables
 
 
 comp_cat_extincs_eda <- tableby(mkbin(extincs) ~ lag_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_extincs_eda,
@@ -3128,7 +3120,7 @@ summary(comp_cat_extincs_eda,
 # Repeat extortions
 
 comp_cat_extincs_eda_r <- tableby(mkbin(extincs, 1) ~ lag_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_extincs_eda_r,
@@ -3137,7 +3129,7 @@ summary(comp_cat_extincs_eda_r,
 # remote extortions
 
 comp_cat_rmt_eda <- tableby(mkbin(remote) ~ lag_rmt_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_rmt_eda,
@@ -3146,7 +3138,7 @@ summary(comp_cat_rmt_eda,
 # repeat remote extortions
 
 comp_cat_rmt_eda_r <- tableby(mkbin(remote, 1) ~ lag_rmt_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_rmt_eda_r,
@@ -3156,7 +3148,7 @@ summary(comp_cat_rmt_eda_r,
 # inperson extortions
 
 comp_cat_inp_eda <- tableby(mkbin(inperson) ~ lag_inp_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_inp_eda,
@@ -3165,7 +3157,7 @@ summary(comp_cat_inp_eda,
 # repeat inperson extortions
 
 comp_cat_inp_eda_r <- tableby(mkbin(inperson, 1) ~ lag_inp_comp_cat,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(comp_cat_inp_eda_r,
@@ -3180,7 +3172,7 @@ summary(comp_cat_inp_eda_r,
 
 
 adj_lag_extincs_eda <- tableby(mkbin(extincs) ~ lag_extincs_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_extincs_eda,
@@ -3189,7 +3181,7 @@ summary(adj_lag_extincs_eda,
 # Repeat extortions
 
 adj_lag_extincs_eda_r <- tableby(mkbin(extincs, 1) ~ lag_extincs_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_extincs_eda_r,
@@ -3198,7 +3190,7 @@ summary(adj_lag_extincs_eda_r,
 # remote extortions
 
 adj_lag_rmt_eda <- tableby(mkbin(remote) ~ lag_rmt_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_rmt_eda,
@@ -3207,7 +3199,7 @@ summary(adj_lag_rmt_eda,
 # repeat remote extortions
 
 adj_lag_rmt_eda_r <- tableby(mkbin(remote, 1) ~ lag_rmt_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_rmt_eda_r,
@@ -3217,7 +3209,7 @@ summary(adj_lag_rmt_eda_r,
 # inperson extortions
 
 adj_lag_inp_eda <- tableby(mkbin(inperson) ~ lag_inp_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_inp_eda,
@@ -3226,7 +3218,7 @@ summary(adj_lag_inp_eda,
 # repeat inperson extortions
 
 adj_lag_inp_eda_r <- tableby(mkbin(inperson, 1) ~ lag_inp_adj,
-                        data  = enve_lag_nm_sem1,
+                        data  = enve_lag_nm_sem1_nona,
                         control = my_controls)
 
 summary(adj_lag_inp_eda_r,
@@ -3237,3903 +3229,718 @@ summary(adj_lag_inp_eda_r,
 
 ```
 
-#### Extincs
-
-
-
-```{r extincs-event-dependence-formulas}
-
-# LHS extincs formula
-
-extincs_null_f <- extincs ~ 1
-
-# Write RHS formulas for easier coding
-
-# Add event dependence formulas
-
-add_extincs_lag <- . ~ . + lag_extincs
-
-add_extincs_adj_lag <- . ~ . + lag_extincs_adj
-
-add_extincs_binlag <- . ~ . + mkbin(lag_extincs)
-
-### Compliance
-
-add_ext_comp <- ~ + lag_comp_cat
-
-
-# Risk heterogeneity
-add_risk <- . ~ . + bribes +
-                yearsquant +
-                size +
-                subsector_new +
-                mylog(bribes_abvic, mean_bribes) +
-                mylog(armas, mean_armas) +
-                mylog(drogas, mean_drogas) +
-                mylog(N, mean_N) +
-                mylog(poblacion, mean_poblacion) +
-                scale(General, mean_General, FALSE) +
-                scale(Derecho, mean_Derecho, FALSE)
-
-## Add random effects
-
-add_cve <- . ~ . + (1|CVE_ENT)
-
-add_nom <- . ~ . + (1|NOM_ENT)
-
-```
-
-
-```{r extincs-event-dependence-incidence}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-extincs_ed_nb_null <- glmmTMB(extincs_null_f,
-                             data = enve_lag_nm_sem1,
-                             family = "nbinom2")
-
-summary(extincs_ed_nb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-extincs_ed_nb_lag <- update(extincs_ed_nb_null, add_extincs_lag)
-
-countsummary(extincs_ed_nb_lag)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_lag)
-
-## Compare to poisson
-
-extincs_ed_p_lag <- update(extincs_ed_nb_lag,
-                           family = "poisson")
-
-countsummary(extincs_ed_p_lag)
-
-compare_nested(extincs_ed_p_lag, extincs_ed_nb_lag)
-
-### Compare to multilevel
-
-extincs_ed_mnb_lag <- update(extincs_ed_nb_lag, add_cve)
-
-countsummary(extincs_ed_mnb_lag)
-
-compare_nested(extincs_ed_nb_lag, extincs_ed_mnb_lag)
-
-### compare to multilevel poisson
-
-extincs_ed_mp_lag <- update(extincs_ed_p_lag, add_cve)
-
-countsummary(extincs_ed_mp_lag)
-
-compare_nested(extincs_ed_mp_lag, extincs_ed_mnb_lag)
-
-compare_nested(extincs_ed_p_lag, extincs_ed_mp_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_nb_risk <- update(extincs_ed_nb_null, add_risk)
-
-countsummary(extincs_ed_nb_risk)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_nb_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_nb_risk)
-
-### Add lag and compare
-
-extincs_ed_nb_risk_lag <- update(extincs_ed_nb_risk, add_extincs_lag)
-
-countsummary(extincs_ed_nb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_nb_risk, extincs_ed_nb_risk_lag)
-compare_alphas(extincs_ed_nb_risk, extincs_ed_nb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_nb_lag, extincs_ed_nb_risk_lag)
-compare_alphas(extincs_ed_nb_lag, extincs_ed_nb_risk_lag)
-
-## poisson risk lag
-
-extincs_ed_p_risk_lag <- update(extincs_ed_nb_risk_lag,
-                                family ="poisson")
-
-countsummary(extincs_ed_p_risk_lag)
-compare_nested(extincs_ed_p_risk_lag, extincs_ed_nb_risk_lag)
-
-### Add multilevel
-
-extincs_ed_mnb_risk <- update(extincs_ed_nb_risk, add_cve)
-
-countsummary(extincs_ed_mnb_risk)
-
-compare_nested(extincs_ed_nb_risk, extincs_ed_mnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mp_risk <- update(extincs_ed_p_risk, add_cve)
-
-countsummary(extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_mnb_risk, extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_p_risk, extincs_ed_mp_risk)
-
-## add lag
-
-extincs_ed_mnb_risk_lag <- update(extincs_ed_mnb_risk, add_extincs_lag)
-
-countsummary(extincs_ed_mnb_risk_lag)
-
-compare_nested(extincs_ed_nb_risk_lag, extincs_ed_mnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mnb_risk, extincs_ed_mnb_risk_lag)
-compare_alphas(extincs_ed_mnb_risk, extincs_ed_mnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mnb_lag, extincs_ed_mnb_risk_lag)
-compare_alphas(extincs_ed_mnb_lag, extincs_ed_mnb_risk_lag)
-
-## m poisson risk lag
-
-extincs_ed_mp_risk_lag <- update(extincs_ed_mnb_risk_lag,
-                                family ="poisson")
-
-countsummary(extincs_ed_mp_risk_lag)
-compare_nested(extincs_ed_mp_risk_lag, extincs_ed_mnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-extincs_ed_nb_adj_lag <- update(extincs_ed_nb_null, add_extincs_adj_lag)
-
-countsummary(extincs_ed_nb_adj_lag)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_adj_lag)
-
-compare_alphas(extincs_ed_nb_lag, extincs_ed_nb_adj_lag)
-
-## Compare to poisson
-
-extincs_ed_p_adj_lag <- update(extincs_ed_nb_adj_lag,
-                           family = "poisson")
-
-countsummary(extincs_ed_p_adj_lag)
-
-compare_nested(extincs_ed_p_adj_lag, extincs_ed_nb_adj_lag)
-
-### Compare to multilevel
-
-extincs_ed_mnb_adj_lag <- update(extincs_ed_nb_adj_lag, add_cve)
-
-countsummary(extincs_ed_mnb_adj_lag)
-
-compare_nested(extincs_ed_nb_adj_lag, extincs_ed_mnb_adj_lag)
-
-compare_alphas(extincs_ed_mnb_lag, extincs_ed_mnb_adj_lag)
-AICtab(extincs_ed_mnb_lag, extincs_ed_mnb_adj_lag)
-
-### compare to multilevel poisson
-
-extincs_ed_mp_adj_lag <- update(extincs_ed_p_adj_lag, add_cve)
-
-countsummary(extincs_ed_mp_adj_lag)
-
-compare_nested(extincs_ed_mp_adj_lag, extincs_ed_mnb_adj_lag)
-
-compare_nested(extincs_ed_p_adj_lag, extincs_ed_mp_adj_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_nb_risk <- update(extincs_ed_nb_null, add_risk)
-
-countsummary(extincs_ed_nb_risk)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_nb_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_nb_risk)
-
-### Add lag and compare
-
-extincs_ed_nb_risk_adj_lag <- update(extincs_ed_nb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_nb_risk_adj_lag)
-
-compare_alphas(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_adj_lag)
-AICtab(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_nb_risk, extincs_ed_nb_risk_adj_lag)
-compare_alphas(extincs_ed_nb_risk, extincs_ed_nb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_nb_adj_lag, extincs_ed_nb_risk_adj_lag)
-compare_alphas(extincs_ed_nb_adj_lag, extincs_ed_nb_risk_adj_lag)
-
-## poisson risk lag
-
-extincs_ed_p_risk_adj_lag <- update(extincs_ed_nb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(extincs_ed_p_risk_adj_lag)
-compare_nested(extincs_ed_p_risk_adj_lag, extincs_ed_nb_risk_adj_lag)
-
-### Add multilevel
-
-extincs_ed_mnb_risk <- update(extincs_ed_nb_risk, add_cve)
-
-countsummary(extincs_ed_mnb_risk)
-
-compare_nested(extincs_ed_nb_risk, extincs_ed_mnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mp_risk <- update(extincs_ed_p_risk, add_cve)
-
-countsummary(extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_mnb_risk, extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_p_risk, extincs_ed_mp_risk)
-
-## add lag
-
-extincs_ed_mnb_risk_adj_lag <- update(extincs_ed_mnb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_mnb_risk_adj_lag)
-
-compare_nested(extincs_ed_nb_risk_adj_lag, extincs_ed_mnb_risk_adj_lag)
-
-compare_alphas(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_adj_lag)
-AICtab(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mnb_risk, extincs_ed_mnb_risk_adj_lag)
-compare_alphas(extincs_ed_mnb_risk, extincs_ed_mnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mnb_adj_lag, extincs_ed_mnb_risk_adj_lag)
-compare_alphas(extincs_ed_mnb_adj_lag, extincs_ed_mnb_risk_adj_lag)
-
-## m poisson risk lag
-
-extincs_ed_mp_risk_adj_lag <- update(extincs_ed_mnb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(extincs_ed_mp_risk_adj_lag)
-compare_nested(extincs_ed_mp_risk_adj_lag, extincs_ed_mnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-extincs_ed_nb_ext_comp <- update(extincs_ed_nb_null, add_ext_comp)
-
-countsummary(extincs_ed_nb_ext_comp)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_ext_comp)
-
-compare_alphas(extincs_ed_nb_lag, extincs_ed_nb_ext_comp)
-
-## Compare to poisson
-
-extincs_ed_p_ext_comp <- update(extincs_ed_nb_ext_comp,
-                           family = "poisson")
-
-countsummary(extincs_ed_p_ext_comp)
-
-compare_nested(extincs_ed_p_ext_comp, extincs_ed_nb_ext_comp)
-
-### Compare to multilevel
-
-extincs_ed_mnb_ext_comp <- update(extincs_ed_nb_ext_comp, add_cve)
-
-countsummary(extincs_ed_mnb_ext_comp)
-
-compare_nested(extincs_ed_nb_ext_comp, extincs_ed_mnb_ext_comp)
-
-compare_alphas(extincs_ed_mnb_lag, extincs_ed_mnb_ext_comp)
-AICtab(extincs_ed_mnb_lag, extincs_ed_mnb_ext_comp)
-
-### compare to multilevel poisson
-
-extincs_ed_mp_ext_comp <- update(extincs_ed_p_ext_comp, add_cve)
-
-countsummary(extincs_ed_mp_ext_comp)
-
-compare_nested(extincs_ed_mp_ext_comp, extincs_ed_mnb_ext_comp)
-
-compare_nested(extincs_ed_p_ext_comp, extincs_ed_mp_ext_comp)
-
-
-### Add risk heterogeneity
-
-extincs_ed_nb_risk <- update(extincs_ed_nb_null, add_risk)
-
-countsummary(extincs_ed_nb_risk)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_nb_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_nb_risk)
-
-### Add lag and compare
-
-extincs_ed_nb_risk_ext_comp <- update(extincs_ed_nb_risk, add_ext_comp)
-
-countsummary(extincs_ed_nb_risk_ext_comp)
-
-compare_alphas(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_ext_comp)
-AICtab(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_nb_risk, extincs_ed_nb_risk_ext_comp)
-compare_alphas(extincs_ed_nb_risk, extincs_ed_nb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_nb_ext_comp, extincs_ed_nb_risk_ext_comp)
-compare_alphas(extincs_ed_nb_ext_comp, extincs_ed_nb_risk_ext_comp)
-
-## poisson risk lag
-
-extincs_ed_p_risk_ext_comp <- update(extincs_ed_nb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(extincs_ed_p_risk_ext_comp)
-compare_nested(extincs_ed_p_risk_ext_comp, extincs_ed_nb_risk_ext_comp)
-
-### Add multilevel
-
-extincs_ed_mnb_risk <- update(extincs_ed_nb_risk, add_cve)
-
-countsummary(extincs_ed_mnb_risk)
-
-compare_nested(extincs_ed_nb_risk, extincs_ed_mnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mp_risk <- update(extincs_ed_p_risk, add_cve)
-
-countsummary(extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_mnb_risk, extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_p_risk, extincs_ed_mp_risk)
-
-## add lag
-
-extincs_ed_mnb_risk_ext_comp <- update(extincs_ed_mnb_risk, add_ext_comp)
-
-countsummary(extincs_ed_mnb_risk_ext_comp)
-
-compare_nested(extincs_ed_nb_risk_ext_comp, extincs_ed_mnb_risk_ext_comp)
-
-compare_alphas(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_ext_comp)
-AICtab(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mnb_risk, extincs_ed_mnb_risk_ext_comp)
-compare_alphas(extincs_ed_mnb_risk, extincs_ed_mnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mnb_ext_comp, extincs_ed_mnb_risk_ext_comp)
-compare_alphas(extincs_ed_mnb_ext_comp, extincs_ed_mnb_risk_ext_comp)
-
-## m poisson risk lag
-
-extincs_ed_mp_risk_ext_comp <- update(extincs_ed_mnb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(extincs_ed_mp_risk_ext_comp)
-compare_nested(extincs_ed_mp_risk_ext_comp, extincs_ed_mnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag  #######
-
-extincs_ed_nb_extincs_binlag <- update(extincs_ed_nb_null, add_extincs_binlag)
-
-countsummary(extincs_ed_nb_extincs_binlag)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_extincs_binlag)
-
-compare_alphas(extincs_ed_nb_lag, extincs_ed_nb_extincs_binlag)
-
-## Compare to poisson
-
-extincs_ed_p_extincs_binlag <- update(extincs_ed_nb_extincs_binlag,
-                           family = "poisson")
-
-countsummary(extincs_ed_p_extincs_binlag)
-
-compare_nested(extincs_ed_p_extincs_binlag, extincs_ed_nb_extincs_binlag)
-
-### Compare to multilevel
-
-extincs_ed_mnb_extincs_binlag <- update(extincs_ed_nb_extincs_binlag, add_cve)
-
-countsummary(extincs_ed_mnb_extincs_binlag)
-
-compare_nested(extincs_ed_nb_extincs_binlag, extincs_ed_mnb_extincs_binlag)
-
-compare_alphas(extincs_ed_mnb_lag, extincs_ed_mnb_extincs_binlag)
-AICtab(extincs_ed_mnb_lag, extincs_ed_mnb_extincs_binlag)
-
-### compare to multilevel poisson
-
-extincs_ed_mp_extincs_binlag <- update(extincs_ed_p_extincs_binlag, add_cve)
-
-countsummary(extincs_ed_mp_extincs_binlag)
-
-compare_nested(extincs_ed_mp_extincs_binlag, extincs_ed_mnb_extincs_binlag)
-
-compare_nested(extincs_ed_p_extincs_binlag, extincs_ed_mp_extincs_binlag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_nb_risk <- update(extincs_ed_nb_null, add_risk)
-
-countsummary(extincs_ed_nb_risk)
-
-compare_alphas(extincs_ed_nb_null, extincs_ed_nb_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_nb_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_nb_risk)
-
-### Add lag and compare
-
-extincs_ed_nb_risk_extincs_binlag <- update(extincs_ed_nb_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_nb_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_extincs_binlag)
-AICtab(extincs_ed_nb_risk_lag, extincs_ed_nb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_nb_risk, extincs_ed_nb_risk_extincs_binlag)
-compare_alphas(extincs_ed_nb_risk, extincs_ed_nb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_nb_extincs_binlag, extincs_ed_nb_risk_extincs_binlag)
-compare_alphas(extincs_ed_nb_extincs_binlag, extincs_ed_nb_risk_extincs_binlag)
-
-## poisson risk lag
-
-extincs_ed_p_risk_extincs_binlag <- update(extincs_ed_nb_risk_extincs_binlag,
-                                family ="poisson")
-
-countsummary(extincs_ed_p_risk_extincs_binlag)
-compare_nested(extincs_ed_p_risk_extincs_binlag, extincs_ed_nb_risk_extincs_binlag)
-
-### Add multilevel
-
-extincs_ed_mnb_risk <- update(extincs_ed_nb_risk, add_cve)
-
-countsummary(extincs_ed_mnb_risk)
-
-compare_nested(extincs_ed_nb_risk, extincs_ed_mnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mp_risk <- update(extincs_ed_p_risk, add_cve)
-
-countsummary(extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_mnb_risk, extincs_ed_mp_risk)
-
-compare_nested(extincs_ed_p_risk, extincs_ed_mp_risk)
-
-## add lag
-
-extincs_ed_mnb_risk_extincs_binlag <- update(extincs_ed_mnb_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_mnb_risk_extincs_binlag)
-
-compare_nested(extincs_ed_nb_risk_extincs_binlag, extincs_ed_mnb_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_extincs_binlag)
-AICtab(extincs_ed_mnb_risk_lag, extincs_ed_mnb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mnb_risk, extincs_ed_mnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_mnb_risk, extincs_ed_mnb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mnb_extincs_binlag, extincs_ed_mnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_mnb_extincs_binlag, extincs_ed_mnb_risk_extincs_binlag)
-
-## m poisson risk lag
-
-extincs_ed_mp_risk_extincs_binlag <- update(extincs_ed_mnb_risk_extincs_binlag,
-                                family ="poisson")
-
-countsummary(extincs_ed_mp_risk_extincs_binlag)
-compare_nested(extincs_ed_mp_risk_extincs_binlag, extincs_ed_mnb_risk_extincs_binlag)
-
-
-```
-
-Now estimate the effect of event dependence on prevalence.
-
-```{r extincs-event-dependence-prevalence}
-
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-extincs_ed_logit_null <- update(extincs_ed_nb_null, mkbin(extincs) ~ .,
-                                family = "binomial")
-
-summary(extincs_ed_logit_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-extincs_ed_logit_lag <- update(extincs_ed_logit_null, add_extincs_lag)
-
-countsummary(extincs_ed_logit_lag)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_lag)
-
-
-### Compare to multilevel
-
-extincs_ed_mlogit_lag <- update(extincs_ed_logit_lag, add_cve)
-
-countsummary(extincs_ed_mlogit_lag)
-
-compare_nested(extincs_ed_logit_lag, extincs_ed_mlogit_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_logit_risk <- update(extincs_ed_logit_null, add_risk)
-
-countsummary(extincs_ed_logit_risk)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_risk)
-
-### Add lag and compare
-
-extincs_ed_logit_risk_lag <- update(extincs_ed_logit_risk, add_extincs_lag)
-
-countsummary(extincs_ed_logit_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_logit_risk, extincs_ed_logit_risk_lag)
-compare_alphas(extincs_ed_logit_risk, extincs_ed_logit_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_logit_lag, extincs_ed_logit_risk_lag)
-compare_alphas(extincs_ed_logit_lag, extincs_ed_logit_risk_lag)
-
-
-### Add multilevel
-
-extincs_ed_mlogit_risk <- update(extincs_ed_logit_risk, add_cve)
-
-countsummary(extincs_ed_mlogit_risk)
-
-compare_nested(extincs_ed_logit_risk, extincs_ed_mlogit_risk)
-
-
-## add lag
-
-extincs_ed_mlogit_risk_lag <- update(extincs_ed_mlogit_risk, add_extincs_lag)
-
-countsummary(extincs_ed_mlogit_risk_lag)
-
-compare_nested(extincs_ed_logit_risk_lag, extincs_ed_mlogit_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_lag)
-compare_alphas(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mlogit_lag, extincs_ed_mlogit_risk_lag)
-compare_alphas(extincs_ed_mlogit_lag, extincs_ed_mlogit_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-extincs_ed_logit_adj_lag <- update(extincs_ed_logit_null, add_extincs_adj_lag)
-
-countsummary(extincs_ed_logit_adj_lag)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_adj_lag)
-
-compare_alphas(extincs_ed_logit_lag, extincs_ed_logit_adj_lag)
-
-
-### Compare to multilevel
-
-extincs_ed_mlogit_adj_lag <- update(extincs_ed_logit_adj_lag, add_cve)
-
-countsummary(extincs_ed_mlogit_adj_lag)
-
-compare_nested(extincs_ed_logit_adj_lag, extincs_ed_mlogit_adj_lag)
-
-compare_alphas(extincs_ed_mlogit_lag, extincs_ed_mlogit_adj_lag)
-AICtab(extincs_ed_mlogit_lag, extincs_ed_mlogit_adj_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_logit_risk <- update(extincs_ed_logit_null, add_risk)
-
-countsummary(extincs_ed_logit_risk)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_risk)
-
-
-### Add lag and compare
-
-extincs_ed_logit_risk_adj_lag <- update(extincs_ed_logit_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_logit_risk_adj_lag)
-
-compare_alphas(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_adj_lag)
-AICtab(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_logit_risk, extincs_ed_logit_risk_adj_lag)
-compare_alphas(extincs_ed_logit_risk, extincs_ed_logit_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_logit_adj_lag, extincs_ed_logit_risk_adj_lag)
-compare_alphas(extincs_ed_logit_adj_lag, extincs_ed_logit_risk_adj_lag)
-
-### Add multilevel
-
-extincs_ed_mlogit_risk <- update(extincs_ed_logit_risk, add_cve)
-
-countsummary(extincs_ed_mlogit_risk)
-
-compare_nested(extincs_ed_logit_risk, extincs_ed_mlogit_risk)
-
-## add lag
-
-extincs_ed_mlogit_risk_adj_lag <- update(extincs_ed_mlogit_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_mlogit_risk_adj_lag)
-
-compare_nested(extincs_ed_logit_risk_adj_lag, extincs_ed_mlogit_risk_adj_lag)
-
-compare_alphas(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_adj_lag)
-AICtab(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_adj_lag)
-compare_alphas(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mlogit_adj_lag, extincs_ed_mlogit_risk_adj_lag)
-compare_alphas(extincs_ed_mlogit_adj_lag, extincs_ed_mlogit_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-extincs_ed_logit_ext_comp <- update(extincs_ed_logit_null, add_ext_comp)
-
-countsummary(extincs_ed_logit_ext_comp)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_ext_comp)
-
-compare_alphas(extincs_ed_logit_lag, extincs_ed_logit_ext_comp)
-
-### Compare to multilevel
-
-extincs_ed_mlogit_ext_comp <- update(extincs_ed_logit_ext_comp, add_cve)
-
-countsummary(extincs_ed_mlogit_ext_comp)
-
-compare_nested(extincs_ed_logit_ext_comp, extincs_ed_mlogit_ext_comp)
-
-compare_alphas(extincs_ed_mlogit_lag, extincs_ed_mlogit_ext_comp)
-AICtab(extincs_ed_mlogit_lag, extincs_ed_mlogit_ext_comp)
-
-
-### Add risk heterogeneity
-
-extincs_ed_logit_risk <- update(extincs_ed_logit_null, add_risk)
-
-countsummary(extincs_ed_logit_risk)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_logit_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_logit_risk)
-
-### Add lag and compare
-
-extincs_ed_logit_risk_ext_comp <- update(extincs_ed_logit_risk, add_ext_comp)
-
-countsummary(extincs_ed_logit_risk_ext_comp)
-
-compare_alphas(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_ext_comp)
-AICtab(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_logit_risk, extincs_ed_logit_risk_ext_comp)
-compare_alphas(extincs_ed_logit_risk, extincs_ed_logit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_logit_ext_comp, extincs_ed_logit_risk_ext_comp)
-compare_alphas(extincs_ed_logit_ext_comp, extincs_ed_logit_risk_ext_comp)
-
-### Add multilevel
-
-extincs_ed_mlogit_risk <- update(extincs_ed_logit_risk, add_cve)
-
-countsummary(extincs_ed_mlogit_risk)
-
-compare_nested(extincs_ed_logit_risk, extincs_ed_mlogit_risk)
-
-## add lag
-
-extincs_ed_mlogit_risk_ext_comp <- update(extincs_ed_mlogit_risk, add_ext_comp)
-
-countsummary(extincs_ed_mlogit_risk_ext_comp)
-
-compare_nested(extincs_ed_logit_risk_ext_comp, extincs_ed_mlogit_risk_ext_comp)
-
-compare_alphas(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_ext_comp)
-AICtab(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_ext_comp)
-compare_alphas(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mlogit_ext_comp, extincs_ed_mlogit_risk_ext_comp)
-compare_alphas(extincs_ed_mlogit_ext_comp, extincs_ed_mlogit_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-extincs_ed_logit_extincs_binlag <- update(extincs_ed_logit_null, add_extincs_binlag)
-
-countsummary(extincs_ed_logit_extincs_binlag)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_extincs_binlag)
-
-compare_alphas(extincs_ed_logit_lag, extincs_ed_logit_extincs_binlag)
-
-### Compare to multilevel
-
-extincs_ed_mlogit_extincs_binlag <- update(extincs_ed_logit_extincs_binlag, add_cve)
-
-countsummary(extincs_ed_mlogit_extincs_binlag)
-
-compare_nested(extincs_ed_logit_extincs_binlag, extincs_ed_mlogit_extincs_binlag)
-
-compare_alphas(extincs_ed_mlogit_lag, extincs_ed_mlogit_extincs_binlag)
-AICtab(extincs_ed_mlogit_lag, extincs_ed_mlogit_extincs_binlag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_logit_risk <- update(extincs_ed_logit_null, add_risk)
-
-countsummary(extincs_ed_logit_risk)
-
-compare_alphas(extincs_ed_logit_null, extincs_ed_logit_risk)
-
-# compare to poisson
-
-extincs_ed_p_risk <- update(extincs_ed_logit_risk, family = "poisson")
-
-lrtest(extincs_ed_p_risk, extincs_ed_logit_risk)
-
-### Add lag and compare
-
-extincs_ed_logit_risk_extincs_binlag <- update(extincs_ed_logit_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_logit_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_extincs_binlag)
-AICtab(extincs_ed_logit_risk_lag, extincs_ed_logit_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_logit_risk, extincs_ed_logit_risk_extincs_binlag)
-compare_alphas(extincs_ed_logit_risk, extincs_ed_logit_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_logit_extincs_binlag, extincs_ed_logit_risk_extincs_binlag)
-compare_alphas(extincs_ed_logit_extincs_binlag, extincs_ed_logit_risk_extincs_binlag)
-
-### Add multilevel
-
-extincs_ed_mlogit_risk <- update(extincs_ed_logit_risk, add_cve)
-
-countsummary(extincs_ed_mlogit_risk)
-
-compare_nested(extincs_ed_logit_risk, extincs_ed_mlogit_risk)
-
-## add lag
-
-extincs_ed_mlogit_risk_extincs_binlag <- update(extincs_ed_mlogit_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_mlogit_risk_extincs_binlag)
-
-compare_nested(extincs_ed_logit_risk_extincs_binlag, extincs_ed_mlogit_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_extincs_binlag)
-AICtab(extincs_ed_mlogit_risk_lag, extincs_ed_mlogit_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_extincs_binlag)
-compare_alphas(extincs_ed_mlogit_risk, extincs_ed_mlogit_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mlogit_extincs_binlag, extincs_ed_mlogit_risk_extincs_binlag)
-compare_alphas(extincs_ed_mlogit_extincs_binlag, extincs_ed_mlogit_risk_extincs_binlag)
-
-```
-
-Next, estimate the effect of event dependence in the truncated count.
-
-```{r extincs-event-dependence-concentration}
-
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-extincs_ed_tnb_null <- update(extincs_ed_nb_null,
-                             data = subset(enve_lag_nm_sem1, extincs > 0),
-                             family = "truncated_nbinom2")
-
-summary(extincs_ed_tnb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-extincs_ed_tnb_lag <- update(extincs_ed_tnb_null, add_extincs_lag)
-
-countsummary(extincs_ed_tnb_lag)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_lag)
-
-## Compare to poisson
-
-extincs_ed_tp_lag <- update(extincs_ed_tnb_lag,
-                           family = "truncated_poisson")
-
-countsummary(extincs_ed_tp_lag)
-
-compare_nested(extincs_ed_tp_lag, extincs_ed_tnb_lag)
-
-### Compare to multilevel
-
-extincs_ed_mtnb_lag <- update(extincs_ed_tnb_lag, add_cve)
-
-countsummary(extincs_ed_mtnb_lag)
-
-compare_nested(extincs_ed_tnb_lag, extincs_ed_mtnb_lag)
-
-### compare to multilevel poisson
-
-extincs_ed_mtp_lag <- update(extincs_ed_tp_lag, add_cve)
-
-countsummary(extincs_ed_mtp_lag)
-
-compare_nested(extincs_ed_mtp_lag, extincs_ed_mtnb_lag)
-
-compare_nested(extincs_ed_tp_lag, extincs_ed_mtp_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_tnb_risk <- update(extincs_ed_tnb_null, add_risk)
-
-countsummary(extincs_ed_tnb_risk)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_ed_tp_risk <- update(extincs_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(extincs_ed_tp_risk, extincs_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_ed_tnb_risk_lag <- update(extincs_ed_tnb_risk, add_extincs_lag)
-
-countsummary(extincs_ed_tnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_tnb_risk, extincs_ed_tnb_risk_lag)
-compare_alphas(extincs_ed_tnb_risk, extincs_ed_tnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_tnb_lag, extincs_ed_tnb_risk_lag)
-compare_alphas(extincs_ed_tnb_lag, extincs_ed_tnb_risk_lag)
-
-## poisson risk lag
-
-extincs_ed_tp_risk_lag <- update(extincs_ed_tnb_risk_lag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_tp_risk_lag)
-compare_nested(extincs_ed_tp_risk_lag, extincs_ed_tnb_risk_lag)
-
-### Add multilevel
-
-extincs_ed_mtnb_risk <- update(extincs_ed_tnb_risk, add_cve)
-
-countsummary(extincs_ed_mtnb_risk)
-
-compare_nested(extincs_ed_tnb_risk, extincs_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mtp_risk <- update(extincs_ed_tp_risk, add_cve)
-
-countsummary(extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_mtnb_risk, extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_tp_risk, extincs_ed_mtp_risk)
-
-## add lag
-
-extincs_ed_mtnb_risk_lag <- update(extincs_ed_mtnb_risk, add_extincs_lag)
-
-countsummary(extincs_ed_mtnb_risk_lag)
-
-compare_nested(extincs_ed_tnb_risk_lag, extincs_ed_mtnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_lag)
-compare_alphas(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mtnb_lag, extincs_ed_mtnb_risk_lag)
-compare_alphas(extincs_ed_mtnb_lag, extincs_ed_mtnb_risk_lag)
-
-## m poisson risk lag
-
-extincs_ed_mtp_risk_lag <- update(extincs_ed_mtnb_risk_lag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_mtp_risk_lag)
-compare_nested(extincs_ed_mtp_risk_lag, extincs_ed_mtnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-extincs_ed_tnb_adj_lag <- update(extincs_ed_tnb_null, add_extincs_adj_lag)
-
-countsummary(extincs_ed_tnb_adj_lag)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_adj_lag)
-
-compare_alphas(extincs_ed_tnb_lag, extincs_ed_tnb_adj_lag)
-
-## Compare to poisson
-
-extincs_ed_tp_adj_lag <- update(extincs_ed_tnb_adj_lag,
-                           family = "truncated_poisson")
-
-countsummary(extincs_ed_tp_adj_lag)
-
-compare_nested(extincs_ed_tp_adj_lag, extincs_ed_tnb_adj_lag)
-
-### Compare to multilevel
-
-extincs_ed_mtnb_adj_lag <- update(extincs_ed_tnb_adj_lag, add_cve)
-
-countsummary(extincs_ed_mtnb_adj_lag)
-
-compare_nested(extincs_ed_tnb_adj_lag, extincs_ed_mtnb_adj_lag)
-
-compare_alphas(extincs_ed_mtnb_lag, extincs_ed_mtnb_adj_lag)
-AICtab(extincs_ed_mtnb_lag, extincs_ed_mtnb_adj_lag)
-
-### compare to multilevel poisson
-
-extincs_ed_mtp_adj_lag <- update(extincs_ed_tp_adj_lag, add_cve)
-
-countsummary(extincs_ed_mtp_adj_lag)
-
-compare_nested(extincs_ed_mtp_adj_lag, extincs_ed_mtnb_adj_lag)
-
-compare_nested(extincs_ed_tp_adj_lag, extincs_ed_mtp_adj_lag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_tnb_risk <- update(extincs_ed_tnb_null, add_risk)
-
-countsummary(extincs_ed_tnb_risk)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_ed_tp_risk <- update(extincs_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(extincs_ed_tp_risk, extincs_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_ed_tnb_risk_adj_lag <- update(extincs_ed_tnb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_tnb_risk_adj_lag)
-
-compare_alphas(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_adj_lag)
-AICtab(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_tnb_risk, extincs_ed_tnb_risk_adj_lag)
-compare_alphas(extincs_ed_tnb_risk, extincs_ed_tnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_tnb_adj_lag, extincs_ed_tnb_risk_adj_lag)
-compare_alphas(extincs_ed_tnb_adj_lag, extincs_ed_tnb_risk_adj_lag)
-
-## poisson risk lag
-
-extincs_ed_tp_risk_adj_lag <- update(extincs_ed_tnb_risk_adj_lag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_tp_risk_adj_lag)
-compare_nested(extincs_ed_tp_risk_adj_lag, extincs_ed_tnb_risk_adj_lag)
-
-### Add multilevel
-
-extincs_ed_mtnb_risk <- update(extincs_ed_tnb_risk, add_cve)
-
-countsummary(extincs_ed_mtnb_risk)
-
-compare_nested(extincs_ed_tnb_risk, extincs_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mtp_risk <- update(extincs_ed_tp_risk, add_cve)
-
-countsummary(extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_mtnb_risk, extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_tp_risk, extincs_ed_mtp_risk)
-
-## add lag
-
-extincs_ed_mtnb_risk_adj_lag <- update(extincs_ed_mtnb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_ed_mtnb_risk_adj_lag)
-
-compare_nested(extincs_ed_tnb_risk_adj_lag, extincs_ed_mtnb_risk_adj_lag)
-
-compare_alphas(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_adj_lag)
-AICtab(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_adj_lag)
-compare_alphas(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mtnb_adj_lag, extincs_ed_mtnb_risk_adj_lag)
-compare_alphas(extincs_ed_mtnb_adj_lag, extincs_ed_mtnb_risk_adj_lag)
-
-## m poisson risk lag
-
-extincs_ed_mtp_risk_adj_lag <- update(extincs_ed_mtnb_risk_adj_lag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_mtp_risk_adj_lag)
-compare_nested(extincs_ed_mtp_risk_adj_lag, extincs_ed_mtnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-extincs_ed_tnb_ext_comp <- update(extincs_ed_tnb_null, add_ext_comp)
-
-countsummary(extincs_ed_tnb_ext_comp)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_ext_comp)
-
-compare_alphas(extincs_ed_tnb_lag, extincs_ed_tnb_ext_comp)
-
-## Compare to poisson
-
-extincs_ed_tp_ext_comp <- update(extincs_ed_tnb_ext_comp,
-                           family = "truncated_poisson")
-
-countsummary(extincs_ed_tp_ext_comp)
-
-compare_nested(extincs_ed_tp_ext_comp, extincs_ed_tnb_ext_comp)
-
-### Compare to multilevel
-
-extincs_ed_mtnb_ext_comp <- update(extincs_ed_tnb_ext_comp, add_cve)
-
-countsummary(extincs_ed_mtnb_ext_comp)
-
-compare_nested(extincs_ed_tnb_ext_comp, extincs_ed_mtnb_ext_comp)
-
-compare_alphas(extincs_ed_mtnb_lag, extincs_ed_mtnb_ext_comp)
-AICtab(extincs_ed_mtnb_lag, extincs_ed_mtnb_ext_comp)
-
-### compare to multilevel poisson
-
-extincs_ed_mtp_ext_comp <- update(extincs_ed_tp_ext_comp, add_cve)
-
-countsummary(extincs_ed_mtp_ext_comp)
-
-compare_nested(extincs_ed_mtp_ext_comp, extincs_ed_mtnb_ext_comp)
-
-compare_nested(extincs_ed_tp_ext_comp, extincs_ed_mtp_ext_comp)
-
-
-### Add risk heterogeneity
-
-extincs_ed_tnb_risk <- update(extincs_ed_tnb_null, add_risk)
-
-countsummary(extincs_ed_tnb_risk)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_ed_tp_risk <- update(extincs_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(extincs_ed_tp_risk, extincs_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_ed_tnb_risk_ext_comp <- update(extincs_ed_tnb_risk, add_ext_comp)
-
-countsummary(extincs_ed_tnb_risk_ext_comp)
-
-compare_alphas(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_ext_comp)
-AICtab(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_tnb_risk, extincs_ed_tnb_risk_ext_comp)
-compare_alphas(extincs_ed_tnb_risk, extincs_ed_tnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_tnb_ext_comp, extincs_ed_tnb_risk_ext_comp)
-compare_alphas(extincs_ed_tnb_ext_comp, extincs_ed_tnb_risk_ext_comp)
-
-## poisson risk lag
-
-extincs_ed_tp_risk_ext_comp <- update(extincs_ed_tnb_risk_ext_comp,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_tp_risk_ext_comp)
-compare_nested(extincs_ed_tp_risk_ext_comp, extincs_ed_tnb_risk_ext_comp)
-
-### Add multilevel
-
-extincs_ed_mtnb_risk <- update(extincs_ed_tnb_risk, add_cve)
-
-countsummary(extincs_ed_mtnb_risk)
-
-compare_nested(extincs_ed_tnb_risk, extincs_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mtp_risk <- update(extincs_ed_tp_risk, add_cve)
-
-countsummary(extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_mtnb_risk, extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_tp_risk, extincs_ed_mtp_risk)
-
-## add lag
-
-extincs_ed_mtnb_risk_ext_comp <- update(extincs_ed_mtnb_risk, add_ext_comp)
-
-countsummary(extincs_ed_mtnb_risk_ext_comp)
-
-compare_nested(extincs_ed_tnb_risk_ext_comp, extincs_ed_mtnb_risk_ext_comp)
-
-compare_alphas(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_ext_comp)
-AICtab(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_ext_comp)
-compare_alphas(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mtnb_ext_comp, extincs_ed_mtnb_risk_ext_comp)
-compare_alphas(extincs_ed_mtnb_ext_comp, extincs_ed_mtnb_risk_ext_comp)
-
-## m poisson risk lag
-
-extincs_ed_mtp_risk_ext_comp <- update(extincs_ed_mtnb_risk_ext_comp,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_mtp_risk_ext_comp)
-compare_nested(extincs_ed_mtp_risk_ext_comp, extincs_ed_mtnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-extincs_ed_tnb_extincs_binlag <- update(extincs_ed_tnb_null, add_extincs_binlag)
-
-countsummary(extincs_ed_tnb_extincs_binlag)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_extincs_binlag)
-
-compare_alphas(extincs_ed_tnb_lag, extincs_ed_tnb_extincs_binlag)
-
-## Compare to poisson
-
-extincs_ed_tp_extincs_binlag <- update(extincs_ed_tnb_extincs_binlag,
-                           family = "truncated_poisson")
-
-countsummary(extincs_ed_tp_extincs_binlag)
-
-compare_nested(extincs_ed_tp_extincs_binlag, extincs_ed_tnb_extincs_binlag)
-
-### Compare to multilevel
-
-extincs_ed_mtnb_extincs_binlag <- update(extincs_ed_tnb_extincs_binlag, add_cve)
-
-countsummary(extincs_ed_mtnb_extincs_binlag)
-
-compare_nested(extincs_ed_tnb_extincs_binlag, extincs_ed_mtnb_extincs_binlag)
-
-compare_alphas(extincs_ed_mtnb_lag, extincs_ed_mtnb_extincs_binlag)
-AICtab(extincs_ed_mtnb_lag, extincs_ed_mtnb_extincs_binlag)
-
-### compare to multilevel poisson
-
-extincs_ed_mtp_extincs_binlag <- update(extincs_ed_tp_extincs_binlag, add_cve)
-
-countsummary(extincs_ed_mtp_extincs_binlag)
-
-compare_nested(extincs_ed_mtp_extincs_binlag, extincs_ed_mtnb_extincs_binlag)
-
-compare_nested(extincs_ed_tp_extincs_binlag, extincs_ed_mtp_extincs_binlag)
-
-
-### Add risk heterogeneity
-
-extincs_ed_tnb_risk <- update(extincs_ed_tnb_null, add_risk)
-
-countsummary(extincs_ed_tnb_risk)
-
-compare_alphas(extincs_ed_tnb_null, extincs_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_ed_tp_risk <- update(extincs_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(extincs_ed_tp_risk, extincs_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_ed_tnb_risk_extincs_binlag <- update(extincs_ed_tnb_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_tnb_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_extincs_binlag)
-AICtab(extincs_ed_tnb_risk_lag, extincs_ed_tnb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_tnb_risk, extincs_ed_tnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_tnb_risk, extincs_ed_tnb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_tnb_extincs_binlag, extincs_ed_tnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_tnb_extincs_binlag, extincs_ed_tnb_risk_extincs_binlag)
-
-## poisson risk lag
-
-extincs_ed_tp_risk_extincs_binlag <- update(extincs_ed_tnb_risk_extincs_binlag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_tp_risk_extincs_binlag)
-compare_nested(extincs_ed_tp_risk_extincs_binlag, extincs_ed_tnb_risk_extincs_binlag)
-
-### Add multilevel
-
-extincs_ed_mtnb_risk <- update(extincs_ed_tnb_risk, add_cve)
-
-countsummary(extincs_ed_mtnb_risk)
-
-compare_nested(extincs_ed_tnb_risk, extincs_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_ed_mtp_risk <- update(extincs_ed_tp_risk, add_cve)
-
-countsummary(extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_mtnb_risk, extincs_ed_mtp_risk)
-
-compare_nested(extincs_ed_tp_risk, extincs_ed_mtp_risk)
-
-## add lag
-
-extincs_ed_mtnb_risk_extincs_binlag <- update(extincs_ed_mtnb_risk, add_extincs_binlag)
-
-countsummary(extincs_ed_mtnb_risk_extincs_binlag)
-
-compare_nested(extincs_ed_tnb_risk_extincs_binlag, extincs_ed_mtnb_risk_extincs_binlag)
-
-compare_alphas(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_extincs_binlag)
-AICtab(extincs_ed_mtnb_risk_lag, extincs_ed_mtnb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_mtnb_risk, extincs_ed_mtnb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_ed_mtnb_extincs_binlag, extincs_ed_mtnb_risk_extincs_binlag)
-compare_alphas(extincs_ed_mtnb_extincs_binlag, extincs_ed_mtnb_risk_extincs_binlag)
-
-## m poisson risk lag
-
-extincs_ed_mtp_risk_extincs_binlag <- update(extincs_ed_mtnb_risk_extincs_binlag,
-                                family ="truncated_poisson")
-
-countsummary(extincs_ed_mtp_risk_extincs_binlag)
-compare_nested(extincs_ed_mtp_risk_extincs_binlag, extincs_ed_mtnb_risk_extincs_binlag)
-
-
-
-
-```
-
-
-Repeat using glmmADMB
-
-```{r extincs-event-dependence-concentration-glmmADMB}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-extincs_admb_ed_tnb_null <- glmmadmb(formula(extincs_ed_tnb_null),
-                             data = subset(enve_lag_nm_sem1, extincs > 0),
-                             family = "truncnbinom",
-                             zeroInflation = FALSE,
-                             admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
-                             extra.args = "-ndi 60000")
-
-summary(extincs_admb_ed_tnb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-extincs_admb_ed_tnb_lag <- update(extincs_admb_ed_tnb_null, add_extincs_lag)
-
-countsummary(extincs_admb_ed_tnb_lag)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_lag)
-
-## Compare to poisson
-
-extincs_admb_ed_tp_lag <- update(extincs_admb_ed_tnb_lag,
-                           family = "truncpoiss")
-
-countsummary(extincs_admb_ed_tp_lag)
-
-compare_nested(extincs_admb_ed_tp_lag, extincs_admb_ed_tnb_lag)
-
-### Compare to multilevel
-
-extincs_admb_ed_mtnb_lag <- update(extincs_admb_ed_tnb_lag, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_lag)
-
-compare_nested(extincs_admb_ed_tnb_lag, extincs_admb_ed_mtnb_lag)
-
-### compare to multilevel poisson
-
-extincs_admb_ed_mtp_lag <- update(extincs_admb_ed_tp_lag, add_nom)
-
-countsummary(extincs_admb_ed_mtp_lag)
-
-compare_nested(extincs_admb_ed_mtp_lag, extincs_admb_ed_mtnb_lag)
-
-compare_nested(extincs_admb_ed_tp_lag, extincs_admb_ed_mtp_lag)
-
-
-### Add risk heterogeneity
-
-extincs_admb_ed_tnb_risk <- update(extincs_admb_ed_tnb_null, add_risk)
-
-countsummary(extincs_admb_ed_tnb_risk)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_admb_ed_tp_risk <- update(extincs_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(extincs_admb_ed_tp_risk, extincs_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_admb_ed_tnb_risk_lag <- update(extincs_admb_ed_tnb_risk, add_extincs_lag)
-
-countsummary(extincs_admb_ed_tnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_lag)
-compare_alphas(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_tnb_lag, extincs_admb_ed_tnb_risk_lag)
-compare_alphas(extincs_admb_ed_tnb_lag, extincs_admb_ed_tnb_risk_lag)
-
-## poisson risk lag
-
-extincs_admb_ed_tp_risk_lag <- update(extincs_admb_ed_tnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_tp_risk_lag)
-compare_nested(extincs_admb_ed_tp_risk_lag, extincs_admb_ed_tnb_risk_lag)
-
-### Add multilevel
-
-extincs_admb_ed_mtnb_risk <- update(extincs_admb_ed_tnb_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_risk)
-
-compare_nested(extincs_admb_ed_tnb_risk, extincs_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_admb_ed_mtp_risk <- update(extincs_admb_ed_tp_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_tp_risk, extincs_admb_ed_mtp_risk)
-
-## add lag
-
-extincs_admb_ed_mtnb_risk_lag <- update(extincs_admb_ed_mtnb_risk, add_extincs_lag)
-
-countsummary(extincs_admb_ed_mtnb_risk_lag)
-
-compare_nested(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_mtnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_lag)
-compare_alphas(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_risk_lag)
-compare_alphas(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_risk_lag)
-
-## m poisson risk lag
-
-extincs_admb_ed_mtp_risk_lag <- update(extincs_admb_ed_mtnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_mtp_risk_lag)
-compare_nested(extincs_admb_ed_mtp_risk_lag, extincs_admb_ed_mtnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-extincs_admb_ed_tnb_adj_lag <- update(extincs_admb_ed_tnb_null, add_extincs_adj_lag)
-
-countsummary(extincs_admb_ed_tnb_adj_lag)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_adj_lag)
-
-compare_alphas(extincs_admb_ed_tnb_lag, extincs_admb_ed_tnb_adj_lag)
-
-## Compare to poisson
-
-extincs_admb_ed_tp_adj_lag <- update(extincs_admb_ed_tnb_adj_lag,
-                           family = "truncpoiss")
-
-countsummary(extincs_admb_ed_tp_adj_lag)
-
-compare_nested(extincs_admb_ed_tp_adj_lag, extincs_admb_ed_tnb_adj_lag)
-
-### Compare to multilevel
-
-extincs_admb_ed_mtnb_adj_lag <- update(extincs_admb_ed_tnb_adj_lag, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_adj_lag)
-
-compare_nested(extincs_admb_ed_tnb_adj_lag, extincs_admb_ed_mtnb_adj_lag)
-
-compare_alphas(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_adj_lag)
-AICtab(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_adj_lag)
-
-### compare to multilevel poisson
-
-extincs_admb_ed_mtp_adj_lag <- update(extincs_admb_ed_tp_adj_lag, add_nom)
-
-countsummary(extincs_admb_ed_mtp_adj_lag)
-
-compare_nested(extincs_admb_ed_mtp_adj_lag, extincs_admb_ed_mtnb_adj_lag)
-
-compare_nested(extincs_admb_ed_tp_adj_lag, extincs_admb_ed_mtp_adj_lag)
-
-
-### Add risk heterogeneity
-
-extincs_admb_ed_tnb_risk <- update(extincs_admb_ed_tnb_null, add_risk)
-
-countsummary(extincs_admb_ed_tnb_risk)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_admb_ed_tp_risk <- update(extincs_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(extincs_admb_ed_tp_risk, extincs_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_admb_ed_tnb_risk_adj_lag <- update(extincs_admb_ed_tnb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_admb_ed_tnb_risk_adj_lag)
-
-compare_alphas(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_adj_lag)
-AICtab(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_adj_lag)
-compare_alphas(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_tnb_adj_lag, extincs_admb_ed_tnb_risk_adj_lag)
-compare_alphas(extincs_admb_ed_tnb_adj_lag, extincs_admb_ed_tnb_risk_adj_lag)
-
-## poisson risk lag
-
-extincs_admb_ed_tp_risk_adj_lag <- update(extincs_admb_ed_tnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_tp_risk_adj_lag)
-compare_nested(extincs_admb_ed_tp_risk_adj_lag, extincs_admb_ed_tnb_risk_adj_lag)
-
-### Add multilevel
-
-extincs_admb_ed_mtnb_risk <- update(extincs_admb_ed_tnb_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_risk)
-
-compare_nested(extincs_admb_ed_tnb_risk, extincs_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_admb_ed_mtp_risk <- update(extincs_admb_ed_tp_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_tp_risk, extincs_admb_ed_mtp_risk)
-
-## add lag
-
-extincs_admb_ed_mtnb_risk_adj_lag <- update(extincs_admb_ed_mtnb_risk, add_extincs_adj_lag)
-
-countsummary(extincs_admb_ed_mtnb_risk_adj_lag)
-
-compare_nested(extincs_admb_ed_tnb_risk_adj_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-
-compare_alphas(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-AICtab(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_mtnb_adj_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(extincs_admb_ed_mtnb_adj_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-
-## m poisson risk lag
-
-extincs_admb_ed_mtp_risk_adj_lag <- update(extincs_admb_ed_mtnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_mtp_risk_adj_lag)
-compare_nested(extincs_admb_ed_mtp_risk_adj_lag, extincs_admb_ed_mtnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-extincs_admb_ed_tnb_ext_comp <- update(extincs_admb_ed_tnb_null, add_ext_comp)
-
-countsummary(extincs_admb_ed_tnb_ext_comp)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_ext_comp)
-
-compare_alphas(extincs_admb_ed_tnb_lag, extincs_admb_ed_tnb_ext_comp)
-
-## Compare to poisson
-
-extincs_admb_ed_tp_ext_comp <- update(extincs_admb_ed_tnb_ext_comp,
-                           family = "truncpoiss")
-
-countsummary(extincs_admb_ed_tp_ext_comp)
-
-compare_nested(extincs_admb_ed_tp_ext_comp, extincs_admb_ed_tnb_ext_comp)
-
-### Compare to multilevel
-
-extincs_admb_ed_mtnb_ext_comp <- update(extincs_admb_ed_tnb_ext_comp, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_ext_comp)
-
-compare_nested(extincs_admb_ed_tnb_ext_comp, extincs_admb_ed_mtnb_ext_comp)
-
-compare_alphas(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_ext_comp)
-AICtab(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_ext_comp)
-
-### compare to multilevel poisson
-
-extincs_admb_ed_mtp_ext_comp <- update(extincs_admb_ed_tp_ext_comp, add_nom)
-
-countsummary(extincs_admb_ed_mtp_ext_comp)
-
-compare_nested(extincs_admb_ed_mtp_ext_comp, extincs_admb_ed_mtnb_ext_comp)
-
-compare_nested(extincs_admb_ed_tp_ext_comp, extincs_admb_ed_mtp_ext_comp)
-
-
-### Add risk heterogeneity
-
-extincs_admb_ed_tnb_risk <- update(extincs_admb_ed_tnb_null, add_risk)
-
-countsummary(extincs_admb_ed_tnb_risk)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_admb_ed_tp_risk <- update(extincs_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(extincs_admb_ed_tp_risk, extincs_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_admb_ed_tnb_risk_ext_comp <- update(extincs_admb_ed_tnb_risk, add_ext_comp)
-
-countsummary(extincs_admb_ed_tnb_risk_ext_comp)
-
-compare_alphas(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_ext_comp)
-AICtab(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_ext_comp)
-compare_alphas(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_tnb_ext_comp, extincs_admb_ed_tnb_risk_ext_comp)
-compare_alphas(extincs_admb_ed_tnb_ext_comp, extincs_admb_ed_tnb_risk_ext_comp)
-
-## poisson risk lag
-
-extincs_admb_ed_tp_risk_ext_comp <- update(extincs_admb_ed_tnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_tp_risk_ext_comp)
-compare_nested(extincs_admb_ed_tp_risk_ext_comp, extincs_admb_ed_tnb_risk_ext_comp)
-
-### Add multilevel
-
-extincs_admb_ed_mtnb_risk <- update(extincs_admb_ed_tnb_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_risk)
-
-compare_nested(extincs_admb_ed_tnb_risk, extincs_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_admb_ed_mtp_risk <- update(extincs_admb_ed_tp_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_tp_risk, extincs_admb_ed_mtp_risk)
-
-## add lag
-
-extincs_admb_ed_mtnb_risk_ext_comp <- update(extincs_admb_ed_mtnb_risk, add_ext_comp)
-
-countsummary(extincs_admb_ed_mtnb_risk_ext_comp)
-
-compare_nested(extincs_admb_ed_tnb_risk_ext_comp, extincs_admb_ed_mtnb_risk_ext_comp)
-
-compare_alphas(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_ext_comp)
-AICtab(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_mtnb_ext_comp, extincs_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(extincs_admb_ed_mtnb_ext_comp, extincs_admb_ed_mtnb_risk_ext_comp)
-
-## m poisson risk lag
-
-extincs_admb_ed_mtp_risk_ext_comp <- update(extincs_admb_ed_mtnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_mtp_risk_ext_comp)
-compare_nested(extincs_admb_ed_mtp_risk_ext_comp, extincs_admb_ed_mtnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-extincs_admb_ed_tnb_extincs_binlag <- update(extincs_admb_ed_tnb_null, add_extincs_binlag)
-
-countsummary(extincs_admb_ed_tnb_extincs_binlag)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_extincs_binlag)
-
-compare_alphas(extincs_admb_ed_tnb_lag, extincs_admb_ed_tnb_extincs_binlag)
-
-## Compare to poisson
-
-extincs_admb_ed_tp_extincs_binlag <- update(extincs_admb_ed_tnb_extincs_binlag,
-                           family = "truncpoiss")
-
-countsummary(extincs_admb_ed_tp_extincs_binlag)
-
-compare_nested(extincs_admb_ed_tp_extincs_binlag, extincs_admb_ed_tnb_extincs_binlag)
-
-### Compare to multilevel
-
-extincs_admb_ed_mtnb_extincs_binlag <- update(extincs_admb_ed_tnb_extincs_binlag, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_extincs_binlag)
-
-compare_nested(extincs_admb_ed_tnb_extincs_binlag, extincs_admb_ed_mtnb_extincs_binlag)
-
-compare_alphas(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_extincs_binlag)
-AICtab(extincs_admb_ed_mtnb_lag, extincs_admb_ed_mtnb_extincs_binlag)
-
-### compare to multilevel poisson
-
-extincs_admb_ed_mtp_extincs_binlag <- update(extincs_admb_ed_tp_extincs_binlag, add_nom)
-
-countsummary(extincs_admb_ed_mtp_extincs_binlag)
-
-compare_nested(extincs_admb_ed_mtp_extincs_binlag, extincs_admb_ed_mtnb_extincs_binlag)
-
-compare_nested(extincs_admb_ed_tp_extincs_binlag, extincs_admb_ed_mtp_extincs_binlag)
-
-
-### Add risk heterogeneity
-
-extincs_admb_ed_tnb_risk <- update(extincs_admb_ed_tnb_null, add_risk)
-
-countsummary(extincs_admb_ed_tnb_risk)
-
-compare_alphas(extincs_admb_ed_tnb_null, extincs_admb_ed_tnb_risk)
-
-# compare to poisson
-
-extincs_admb_ed_tp_risk <- update(extincs_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(extincs_admb_ed_tp_risk, extincs_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-extincs_admb_ed_tnb_risk_extincs_binlag <- update(extincs_admb_ed_tnb_risk, add_extincs_binlag)
-
-countsummary(extincs_admb_ed_tnb_risk_extincs_binlag)
-
-compare_alphas(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_extincs_binlag)
-AICtab(extincs_admb_ed_tnb_risk_lag, extincs_admb_ed_tnb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_extincs_binlag)
-compare_alphas(extincs_admb_ed_tnb_risk, extincs_admb_ed_tnb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_tnb_extincs_binlag, extincs_admb_ed_tnb_risk_extincs_binlag)
-compare_alphas(extincs_admb_ed_tnb_extincs_binlag, extincs_admb_ed_tnb_risk_extincs_binlag)
-
-## poisson risk lag
-
-extincs_admb_ed_tp_risk_extincs_binlag <- update(extincs_admb_ed_tnb_risk_extincs_binlag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_tp_risk_extincs_binlag)
-compare_nested(extincs_admb_ed_tp_risk_extincs_binlag, extincs_admb_ed_tnb_risk_extincs_binlag)
-
-### Add multilevel
-
-extincs_admb_ed_mtnb_risk <- update(extincs_admb_ed_tnb_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtnb_risk)
-
-compare_nested(extincs_admb_ed_tnb_risk, extincs_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-extincs_admb_ed_mtp_risk <- update(extincs_admb_ed_tp_risk, add_nom)
-
-countsummary(extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtp_risk)
-
-compare_nested(extincs_admb_ed_tp_risk, extincs_admb_ed_mtp_risk)
-
-## add lag
-
-extincs_admb_ed_mtnb_risk_extincs_binlag <- update(extincs_admb_ed_mtnb_risk, add_extincs_binlag)
-
-countsummary(extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-compare_nested(extincs_admb_ed_tnb_risk_extincs_binlag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-compare_alphas(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-AICtab(extincs_admb_ed_mtnb_risk_lag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-### Compare adding lag to risk
-
-lrtest(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_extincs_binlag)
-compare_alphas(extincs_admb_ed_mtnb_risk, extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-## Compare adding risk to lag
-
-lrtest(extincs_admb_ed_mtnb_extincs_binlag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-compare_alphas(extincs_admb_ed_mtnb_extincs_binlag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-## m poisson risk lag
-
-extincs_admb_ed_mtp_risk_extincs_binlag <- update(extincs_admb_ed_mtnb_risk_extincs_binlag,
-                                family ="truncpoiss")
-
-countsummary(extincs_admb_ed_mtp_risk_extincs_binlag)
-compare_nested(extincs_admb_ed_mtp_risk_extincs_binlag, extincs_admb_ed_mtnb_risk_extincs_binlag)
-
-
-
-```
-
 
 #### Remote
 
-Now repeat the analysis above for remote extortions.
+Model event dependence on remote extortions.
 
+Do only prevalence (logit) and concentration (truncated count) models.
 
-
-```{r remote-event-dependence-formulas}
-
-# LHS extincs formula
-
-remote_null_f <- remote ~ 1
-
-# Write RHS formulas for easier coding
-
-# Add event dependence formulas
-
-add_remote_lag <- . ~ . + lag_remote
-
-add_remote_adj_lag <- . ~ . + lag_rmt_adj
-
-add_remote_binlag <- . ~ . + mkbin(lag_remote)
-
-### Compliance
-
-add_remote_comp <- ~ + lag_rmt_comp_cat
-
-
-```
-
-
-```{r remote-event-dependence-incidence}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-remote_ed_nb_null <- glmmTMB(remote_null_f,
-                             data = enve_lag_nm_sem1,
-                             family = "nbinom2")
-
-summary(remote_ed_nb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-remote_ed_nb_lag <- update(remote_ed_nb_null, add_remote_lag)
-
-countsummary(remote_ed_nb_lag)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_lag)
-
-## Compare to poisson
-
-remote_ed_p_lag <- update(remote_ed_nb_lag,
-                           family = "poisson")
-
-countsummary(remote_ed_p_lag)
-
-compare_nested(remote_ed_p_lag, remote_ed_nb_lag)
-
-### Compare to multilevel
-
-remote_ed_mnb_lag <- update(remote_ed_nb_lag, add_cve)
-
-countsummary(remote_ed_mnb_lag)
-
-compare_nested(remote_ed_nb_lag, remote_ed_mnb_lag)
-
-### compare to multilevel poisson
-
-remote_ed_mp_lag <- update(remote_ed_p_lag, add_cve)
-
-countsummary(remote_ed_mp_lag)
-
-compare_nested(remote_ed_mp_lag, remote_ed_mnb_lag)
-
-compare_nested(remote_ed_p_lag, remote_ed_mp_lag)
-
-
-### Add risk heterogeneity
-
-remote_ed_nb_risk <- update(remote_ed_nb_null, add_risk)
-
-countsummary(remote_ed_nb_risk)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_nb_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_nb_risk)
-
-### Add lag and compare
-
-remote_ed_nb_risk_lag <- update(remote_ed_nb_risk, add_remote_lag)
-
-countsummary(remote_ed_nb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_nb_risk, remote_ed_nb_risk_lag)
-compare_alphas(remote_ed_nb_risk, remote_ed_nb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_nb_lag, remote_ed_nb_risk_lag)
-compare_alphas(remote_ed_nb_lag, remote_ed_nb_risk_lag)
-
-## poisson risk lag
-
-remote_ed_p_risk_lag <- update(remote_ed_nb_risk_lag,
-                                family ="poisson")
-
-countsummary(remote_ed_p_risk_lag)
-compare_nested(remote_ed_p_risk_lag, remote_ed_nb_risk_lag)
-
-### Add multilevel
-
-remote_ed_mnb_risk <- update(remote_ed_nb_risk, add_cve)
-
-countsummary(remote_ed_mnb_risk)
-
-compare_nested(remote_ed_nb_risk, remote_ed_mnb_risk)
-
-# multilevel poisson
-
-remote_ed_mp_risk <- update(remote_ed_p_risk, add_cve)
-
-countsummary(remote_ed_mp_risk)
-
-compare_nested(remote_ed_mnb_risk, remote_ed_mp_risk)
-
-compare_nested(remote_ed_p_risk, remote_ed_mp_risk)
-
-## add lag
-
-remote_ed_mnb_risk_lag <- update(remote_ed_mnb_risk, add_remote_lag)
-
-countsummary(remote_ed_mnb_risk_lag)
-
-compare_nested(remote_ed_nb_risk_lag, remote_ed_mnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mnb_risk, remote_ed_mnb_risk_lag)
-compare_alphas(remote_ed_mnb_risk, remote_ed_mnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mnb_lag, remote_ed_mnb_risk_lag)
-compare_alphas(remote_ed_mnb_lag, remote_ed_mnb_risk_lag)
-
-## m poisson risk lag
-
-remote_ed_mp_risk_lag <- update(remote_ed_mnb_risk_lag,
-                                family ="poisson")
-
-countsummary(remote_ed_mp_risk_lag)
-compare_nested(remote_ed_mp_risk_lag, remote_ed_mnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-remote_ed_nb_adj_lag <- update(remote_ed_nb_null, add_remote_adj_lag)
-
-countsummary(remote_ed_nb_adj_lag)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_adj_lag)
-
-compare_alphas(remote_ed_nb_lag, remote_ed_nb_adj_lag)
-
-## Compare to poisson
-
-remote_ed_p_adj_lag <- update(remote_ed_nb_adj_lag,
-                           family = "poisson")
-
-countsummary(remote_ed_p_adj_lag)
-
-compare_nested(remote_ed_p_adj_lag, remote_ed_nb_adj_lag)
-
-### Compare to multilevel
-
-remote_ed_mnb_adj_lag <- update(remote_ed_nb_adj_lag, add_cve)
-
-countsummary(remote_ed_mnb_adj_lag)
-
-compare_nested(remote_ed_nb_adj_lag, remote_ed_mnb_adj_lag)
-
-compare_alphas(remote_ed_mnb_lag, remote_ed_mnb_adj_lag)
-AICtab(remote_ed_mnb_lag, remote_ed_mnb_adj_lag)
-
-### compare to multilevel poisson
-
-remote_ed_mp_adj_lag <- update(remote_ed_p_adj_lag, add_cve)
-
-countsummary(remote_ed_mp_adj_lag)
-
-compare_nested(remote_ed_mp_adj_lag, remote_ed_mnb_adj_lag)
-
-compare_nested(remote_ed_p_adj_lag, remote_ed_mp_adj_lag)
-
-
-### Add risk heterogeneity
-
-remote_ed_nb_risk <- update(remote_ed_nb_null, add_risk)
-
-countsummary(remote_ed_nb_risk)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_nb_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_nb_risk)
-
-### Add lag and compare
-
-remote_ed_nb_risk_adj_lag <- update(remote_ed_nb_risk, add_remote_adj_lag)
-
-countsummary(remote_ed_nb_risk_adj_lag)
-
-compare_alphas(remote_ed_nb_risk_lag, remote_ed_nb_risk_adj_lag)
-AICtab(remote_ed_nb_risk_lag, remote_ed_nb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_nb_risk, remote_ed_nb_risk_adj_lag)
-compare_alphas(remote_ed_nb_risk, remote_ed_nb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_nb_adj_lag, remote_ed_nb_risk_adj_lag)
-compare_alphas(remote_ed_nb_adj_lag, remote_ed_nb_risk_adj_lag)
-
-## poisson risk lag
-
-remote_ed_p_risk_adj_lag <- update(remote_ed_nb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(remote_ed_p_risk_adj_lag)
-compare_nested(remote_ed_p_risk_adj_lag, remote_ed_nb_risk_adj_lag)
-
-### Add multilevel
-
-remote_ed_mnb_risk <- update(remote_ed_nb_risk, add_cve)
-
-countsummary(remote_ed_mnb_risk)
-
-compare_nested(remote_ed_nb_risk, remote_ed_mnb_risk)
-
-# multilevel poisson
-
-remote_ed_mp_risk <- update(remote_ed_p_risk, add_cve)
-
-countsummary(remote_ed_mp_risk)
-
-compare_nested(remote_ed_mnb_risk, remote_ed_mp_risk)
-
-compare_nested(remote_ed_p_risk, remote_ed_mp_risk)
-
-## add lag
-
-remote_ed_mnb_risk_adj_lag <- update(remote_ed_mnb_risk, add_remote_adj_lag)
-
-countsummary(remote_ed_mnb_risk_adj_lag)
-
-compare_nested(remote_ed_nb_risk_adj_lag, remote_ed_mnb_risk_adj_lag)
-
-compare_alphas(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_adj_lag)
-AICtab(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mnb_risk, remote_ed_mnb_risk_adj_lag)
-compare_alphas(remote_ed_mnb_risk, remote_ed_mnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mnb_adj_lag, remote_ed_mnb_risk_adj_lag)
-compare_alphas(remote_ed_mnb_adj_lag, remote_ed_mnb_risk_adj_lag)
-
-## m poisson risk lag
-
-remote_ed_mp_risk_adj_lag <- update(remote_ed_mnb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(remote_ed_mp_risk_adj_lag)
-compare_nested(remote_ed_mp_risk_adj_lag, remote_ed_mnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-remote_ed_nb_ext_comp <- update(remote_ed_nb_null, add_remote_comp)
-
-countsummary(remote_ed_nb_ext_comp)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_ext_comp)
-
-compare_alphas(remote_ed_nb_lag, remote_ed_nb_ext_comp)
-
-## Compare to poisson
-
-remote_ed_p_ext_comp <- update(remote_ed_nb_ext_comp,
-                           family = "poisson")
-
-countsummary(remote_ed_p_ext_comp)
-
-compare_nested(remote_ed_p_ext_comp, remote_ed_nb_ext_comp)
-
-### Compare to multilevel
-
-remote_ed_mnb_ext_comp <- update(remote_ed_nb_ext_comp, add_cve)
-
-countsummary(remote_ed_mnb_ext_comp)
-
-compare_nested(remote_ed_nb_ext_comp, remote_ed_mnb_ext_comp)
-
-compare_alphas(remote_ed_mnb_lag, remote_ed_mnb_ext_comp)
-AICtab(remote_ed_mnb_lag, remote_ed_mnb_ext_comp)
-
-### compare to multilevel poisson
-
-remote_ed_mp_ext_comp <- update(remote_ed_p_ext_comp, add_cve)
-
-countsummary(remote_ed_mp_ext_comp)
-
-compare_nested(remote_ed_mp_ext_comp, remote_ed_mnb_ext_comp)
-
-compare_nested(remote_ed_p_ext_comp, remote_ed_mp_ext_comp)
-
-
-### Add risk heterogeneity
-
-remote_ed_nb_risk <- update(remote_ed_nb_null, add_risk)
-
-countsummary(remote_ed_nb_risk)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_nb_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_nb_risk)
-
-### Add lag and compare
-
-remote_ed_nb_risk_ext_comp <- update(remote_ed_nb_risk, add_remote_comp)
-
-countsummary(remote_ed_nb_risk_ext_comp)
-
-compare_alphas(remote_ed_nb_risk_lag, remote_ed_nb_risk_ext_comp)
-AICtab(remote_ed_nb_risk_lag, remote_ed_nb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_nb_risk, remote_ed_nb_risk_ext_comp)
-compare_alphas(remote_ed_nb_risk, remote_ed_nb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_nb_ext_comp, remote_ed_nb_risk_ext_comp)
-compare_alphas(remote_ed_nb_ext_comp, remote_ed_nb_risk_ext_comp)
-
-## poisson risk lag
-
-remote_ed_p_risk_ext_comp <- update(remote_ed_nb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(remote_ed_p_risk_ext_comp)
-compare_nested(remote_ed_p_risk_ext_comp, remote_ed_nb_risk_ext_comp)
-
-### Add multilevel
-
-remote_ed_mnb_risk <- update(remote_ed_nb_risk, add_cve)
-
-countsummary(remote_ed_mnb_risk)
-
-compare_nested(remote_ed_nb_risk, remote_ed_mnb_risk)
-
-# multilevel poisson
-
-remote_ed_mp_risk <- update(remote_ed_p_risk, add_cve)
-
-countsummary(remote_ed_mp_risk)
-
-compare_nested(remote_ed_mnb_risk, remote_ed_mp_risk)
-
-compare_nested(remote_ed_p_risk, remote_ed_mp_risk)
-
-## add lag
-
-remote_ed_mnb_risk_ext_comp <- update(remote_ed_mnb_risk, add_remote_comp)
-
-countsummary(remote_ed_mnb_risk_ext_comp)
-
-compare_nested(remote_ed_nb_risk_ext_comp, remote_ed_mnb_risk_ext_comp)
-
-compare_alphas(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_ext_comp)
-AICtab(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mnb_risk, remote_ed_mnb_risk_ext_comp)
-compare_alphas(remote_ed_mnb_risk, remote_ed_mnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mnb_ext_comp, remote_ed_mnb_risk_ext_comp)
-compare_alphas(remote_ed_mnb_ext_comp, remote_ed_mnb_risk_ext_comp)
-
-## m poisson risk lag
-
-remote_ed_mp_risk_ext_comp <- update(remote_ed_mnb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(remote_ed_mp_risk_ext_comp)
-compare_nested(remote_ed_mp_risk_ext_comp, remote_ed_mnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-remote_ed_nb_binlag <- update(remote_ed_nb_null, add_remote_binlag)
-
-countsummary(remote_ed_nb_binlag)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_binlag)
-
-compare_alphas(remote_ed_nb_lag, remote_ed_nb_binlag)
-
-## Compare to poisson
-
-remote_ed_p_binlag <- update(remote_ed_nb_binlag,
-                           family = "poisson")
-
-countsummary(remote_ed_p_binlag)
-
-compare_nested(remote_ed_p_binlag, remote_ed_nb_binlag)
-
-### Compare to multilevel
-
-remote_ed_mnb_binlag <- update(remote_ed_nb_binlag, add_cve)
-
-countsummary(remote_ed_mnb_binlag)
-
-compare_nested(remote_ed_nb_binlag, remote_ed_mnb_binlag)
-
-compare_alphas(remote_ed_mnb_lag, remote_ed_mnb_binlag)
-AICtab(remote_ed_mnb_lag, remote_ed_mnb_binlag)
-
-### compare to multilevel poisson
-
-remote_ed_mp_binlag <- update(remote_ed_p_binlag, add_cve)
-
-countsummary(remote_ed_mp_binlag)
-
-compare_nested(remote_ed_mp_binlag, remote_ed_mnb_binlag)
-
-compare_nested(remote_ed_p_binlag, remote_ed_mp_binlag)
-
-
-### Add risk heterogeneity
-
-remote_ed_nb_risk <- update(remote_ed_nb_null, add_risk)
-
-countsummary(remote_ed_nb_risk)
-
-compare_alphas(remote_ed_nb_null, remote_ed_nb_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_nb_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_nb_risk)
-
-### Add lag and compare
-
-remote_ed_nb_risk_binlag <- update(remote_ed_nb_risk, add_remote_binlag)
-
-countsummary(remote_ed_nb_risk_binlag)
-
-compare_alphas(remote_ed_nb_risk_lag, remote_ed_nb_risk_binlag)
-AICtab(remote_ed_nb_risk_lag, remote_ed_nb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_nb_risk, remote_ed_nb_risk_binlag)
-compare_alphas(remote_ed_nb_risk, remote_ed_nb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_nb_binlag, remote_ed_nb_risk_binlag)
-compare_alphas(remote_ed_nb_binlag, remote_ed_nb_risk_binlag)
-
-## poisson risk lag
-
-remote_ed_p_risk_binlag <- update(remote_ed_nb_risk_binlag,
-                                family ="poisson")
-
-countsummary(remote_ed_p_risk_binlag)
-compare_nested(remote_ed_p_risk_binlag, remote_ed_nb_risk_binlag)
-
-### Add multilevel
-
-remote_ed_mnb_risk <- update(remote_ed_nb_risk, add_cve)
-
-countsummary(remote_ed_mnb_risk)
-
-compare_nested(remote_ed_nb_risk, remote_ed_mnb_risk)
-
-# multilevel poisson
-
-remote_ed_mp_risk <- update(remote_ed_p_risk, add_cve)
-
-countsummary(remote_ed_mp_risk)
-
-compare_nested(remote_ed_mnb_risk, remote_ed_mp_risk)
-
-compare_nested(remote_ed_p_risk, remote_ed_mp_risk)
-
-## add lag
-
-remote_ed_mnb_risk_binlag <- update(remote_ed_mnb_risk, add_remote_binlag)
-
-countsummary(remote_ed_mnb_risk_binlag)
-
-compare_nested(remote_ed_nb_risk_binlag, remote_ed_mnb_risk_binlag)
-
-compare_alphas(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_binlag)
-AICtab(remote_ed_mnb_risk_lag, remote_ed_mnb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mnb_risk, remote_ed_mnb_risk_binlag)
-compare_alphas(remote_ed_mnb_risk, remote_ed_mnb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mnb_binlag, remote_ed_mnb_risk_binlag)
-compare_alphas(remote_ed_mnb_binlag, remote_ed_mnb_risk_binlag)
-
-## m poisson risk lag
-
-remote_ed_mp_risk_binlag <- update(remote_ed_mnb_risk_binlag,
-                                family ="poisson")
-
-countsummary(remote_ed_mp_risk_binlag)
-compare_nested(remote_ed_mp_risk_binlag, remote_ed_mnb_risk_binlag)
-
-```
-
-Now estimate the effect of event dependence on prevalence.
 
 ```{r remote-event-dependence-prevalence}
 
+## Use enve_lag_nm_sem1_nona
 
-## Use enve_lag_nm_sem1
+# Bivariate model of event dependence
 
-#### First test event dependence versus a null model
+ed_rmt_logit <- glmmTMB(mkbin(remote) ~ lag_remote,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
-remote_ed_logit_null <- update(remote_ed_nb_null, mkbin(remote) ~ .,
-                                family = "binomial")
+countsummary(ed_rmt_logit)
 
-summary(remote_ed_logit_null)
+# Test multilevel
 
-### Test event dependence term (then repeat for adjusted and compliance cats)
+ed_rmt_mlogit <- update(ed_rmt_logit, add_nom)
 
-remote_ed_logit_lag <- update(remote_ed_logit_null, add_remote_lag)
+countsummary(ed_rmt_mlogit)
 
-countsummary(remote_ed_logit_lag)
+compare_nested(ed_rmt_logit, ed_rmt_mlogit)
 
-compare_alphas(remote_ed_logit_null, remote_ed_logit_lag)
+## null models
 
+ed_rmt_mlogit_null <- update(ed_rmt_mlogit, . ~ . - lag_remote)
 
-### Compare to multilevel
+summary(ed_rmt_mlogit_null)
 
-remote_ed_mlogit_lag <- update(remote_ed_logit_lag, add_cve)
+### Risk heterogeneity
 
-countsummary(remote_ed_mlogit_lag)
+ed_rmt_mlogit_risk <- update(ed_rmt_mlogit, formula(rmt_mlogit_pars))
 
-compare_nested(remote_ed_logit_lag, remote_ed_mlogit_lag)
+countsummary(ed_rmt_mlogit_risk)
 
+#### add lag to risk
 
-### Add risk heterogeneity
+ed_rmt_mlogit_risk_lag <- update(ed_rmt_mlogit_risk,
+            . ~ lag_remote + .)
 
-remote_ed_logit_risk <- update(remote_ed_logit_null, add_risk)
+countsummary(ed_rmt_mlogit_risk_lag)
 
-countsummary(remote_ed_logit_risk)
 
-compare_alphas(remote_ed_logit_null, remote_ed_logit_risk)
+### Test multilevel
 
-### Add lag and compare
+ed_rmt_logit_risk_lag <- update(ed_rmt_mlogit_risk_lag,
+            . ~ . - (1|NOM_ENT))
 
-remote_ed_logit_risk_lag <- update(remote_ed_logit_risk, add_remote_lag)
+countsummary(ed_rmt_logit_risk_lag)
 
-countsummary(remote_ed_logit_risk_lag)
+compare_nested(ed_rmt_logit_risk_lag, ed_rmt_mlogit_risk_lag)
 
-### Compare adding lag to risk
+#### Risk to lag
 
-lrtest(remote_ed_logit_risk, remote_ed_logit_risk_lag)
-compare_alphas(remote_ed_logit_risk, remote_ed_logit_risk_lag)
+compare_nested(ed_rmt_mlogit_risk, ed_rmt_mlogit_risk_lag)
 
-## Compare adding risk to lag
+#### Lag to risk
 
-lrtest(remote_ed_logit_lag, remote_ed_logit_risk_lag)
-compare_alphas(remote_ed_logit_lag, remote_ed_logit_risk_lag)
+compare_nested(ed_rmt_mlogit, ed_rmt_mlogit_risk_lag)
 
+coef_csv(ed_rmt_mlogit)
+coef_csv(ed_rmt_mlogit_risk)
+coef_csv(ed_rmt_mlogit_risk_lag)
 
-### Add multilevel
+## Then lag_rmt_adj
 
-remote_ed_mlogit_risk <- update(remote_ed_logit_risk, add_cve)
+# Bivariate model of event dependence
 
-countsummary(remote_ed_mlogit_risk)
+ed_rmt_logit_adj <- glmmTMB(mkbin(remote) ~ lag_rmt_adj,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
-compare_nested(remote_ed_logit_risk, remote_ed_mlogit_risk)
+countsummary(ed_rmt_logit_adj)
 
+# Test multilevel
 
-## add lag
+ed_rmt_mlogit_adj <- update(ed_rmt_logit_adj, add_nom)
 
-remote_ed_mlogit_risk_lag <- update(remote_ed_mlogit_risk, add_remote_lag)
+countsummary(ed_rmt_mlogit_adj)
 
-countsummary(remote_ed_mlogit_risk_lag)
+compare_nested(ed_rmt_logit_adj, ed_rmt_mlogit_adj)
 
-compare_nested(remote_ed_logit_risk_lag, remote_ed_mlogit_risk_lag)
+AICtab(ed_rmt_mlogit_adj, ed_rmt_mlogit)
 
-### Compare adding lag to risk
+#### add adj lag
 
-lrtest(remote_ed_mlogit_risk, remote_ed_mlogit_risk_lag)
-compare_alphas(remote_ed_mlogit_risk, remote_ed_mlogit_risk_lag)
+ed_rmt_mlogit_risk_lag_adj <- update(ed_rmt_mlogit_risk,
+            . ~ lag_rmt_adj + .)
 
-## Compare adding risk to lag
+countsummary(ed_rmt_mlogit_risk_lag_adj)
 
-lrtest(remote_ed_mlogit_lag, remote_ed_mlogit_risk_lag)
-compare_alphas(remote_ed_mlogit_lag, remote_ed_mlogit_risk_lag)
 
+### Test multilevel
 
-####### Test event dependence term using adjusted rate #######
+ed_rmt_logit_risk_lag_adj <- update(ed_rmt_mlogit_risk_lag_adj,
+            . ~ . - (1|NOM_ENT))
 
-remote_ed_logit_adj_lag <- update(remote_ed_logit_null, add_remote_adj_lag)
+countsummary(ed_rmt_logit_risk_lag_adj)
 
-countsummary(remote_ed_logit_adj_lag)
+compare_nested(ed_rmt_logit_risk_lag_adj, ed_rmt_mlogit_risk_lag_adj)
 
-compare_alphas(remote_ed_logit_null, remote_ed_logit_adj_lag)
+#### Risk to lag
 
-compare_alphas(remote_ed_logit_lag, remote_ed_logit_adj_lag)
+compare_nested(ed_rmt_mlogit_risk, ed_rmt_mlogit_risk_lag_adj)
 
+#### Lag to risk
 
-### Compare to multilevel
+compare_nested(ed_rmt_mlogit_adj, ed_rmt_mlogit_risk_lag_adj)
 
-remote_ed_mlogit_adj_lag <- update(remote_ed_logit_adj_lag, add_cve)
+coef_csv(ed_rmt_mlogit_adj)
+coef_csv(ed_rmt_mlogit_risk_lag_adj)
 
-countsummary(remote_ed_mlogit_adj_lag)
+## then lag_rmt_comp_cat
 
-compare_nested(remote_ed_logit_adj_lag, remote_ed_mlogit_adj_lag)
+# Bivariate model of event dependence
 
-compare_alphas(remote_ed_mlogit_lag, remote_ed_mlogit_adj_lag)
-AICtab(remote_ed_mlogit_lag, remote_ed_mlogit_adj_lag)
+ed_rmt_logit_comp <- glmmTMB(mkbin(remote) ~ lag_rmt_comp_cat,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
+countsummary(ed_rmt_logit_comp)
 
-### Add risk heterogeneity
+# Test multilevel
 
-remote_ed_logit_risk <- update(remote_ed_logit_null, add_risk)
+ed_rmt_mlogit_comp <- update(ed_rmt_logit_comp, add_nom)
 
-countsummary(remote_ed_logit_risk)
+countsummary(ed_rmt_mlogit_comp)
 
-compare_alphas(remote_ed_logit_null, remote_ed_logit_risk)
+compare_nested(ed_rmt_logit_comp, ed_rmt_mlogit_comp)
 
+AICtab(ed_rmt_mlogit_comp, ed_rmt_mlogit_adj, ed_rmt_mlogit)
 
-### Add lag and compare
+#### add comp lag to risk
 
-remote_ed_logit_risk_adj_lag <- update(remote_ed_logit_risk, add_remote_adj_lag)
+ed_rmt_mlogit_risk_lag_comp <- update(ed_rmt_mlogit_risk,
+            . ~ lag_rmt_comp_cat + .)
 
-countsummary(remote_ed_logit_risk_adj_lag)
+countsummary(ed_rmt_mlogit_risk_lag_comp)
 
-compare_alphas(remote_ed_logit_risk_lag, remote_ed_logit_risk_adj_lag)
-AICtab(remote_ed_logit_risk_lag, remote_ed_logit_risk_adj_lag)
 
-### Compare adding lag to risk
+### Test multilevel
 
-lrtest(remote_ed_logit_risk, remote_ed_logit_risk_adj_lag)
-compare_alphas(remote_ed_logit_risk, remote_ed_logit_risk_adj_lag)
+ed_rmt_logit_risk_lag_comp <- update(ed_rmt_mlogit_risk_lag_comp,
+            . ~ . - (1|NOM_ENT))
 
-## Compare adding risk to lag
+countsummary(ed_rmt_logit_risk_lag_comp)
 
-lrtest(remote_ed_logit_adj_lag, remote_ed_logit_risk_adj_lag)
-compare_alphas(remote_ed_logit_adj_lag, remote_ed_logit_risk_adj_lag)
+compare_nested(ed_rmt_logit_risk_lag_comp,
+                ed_rmt_mlogit_risk_lag_comp)
 
-### Add multilevel
+#### Risk to lag
 
-remote_ed_mlogit_risk <- update(remote_ed_logit_risk, add_cve)
+compare_nested(ed_rmt_mlogit_risk, ed_rmt_mlogit_risk_lag_comp)
 
-countsummary(remote_ed_mlogit_risk)
+#### Lag to risk
 
-compare_nested(remote_ed_logit_risk, remote_ed_mlogit_risk)
+compare_nested(ed_rmt_mlogit_comp, ed_rmt_mlogit_risk_lag_comp)
 
-## add lag
-
-remote_ed_mlogit_risk_adj_lag <- update(remote_ed_mlogit_risk, add_remote_adj_lag)
-
-countsummary(remote_ed_mlogit_risk_adj_lag)
-
-compare_nested(remote_ed_logit_risk_adj_lag, remote_ed_mlogit_risk_adj_lag)
-
-compare_alphas(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_adj_lag)
-AICtab(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mlogit_risk, remote_ed_mlogit_risk_adj_lag)
-compare_alphas(remote_ed_mlogit_risk, remote_ed_mlogit_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mlogit_adj_lag, remote_ed_mlogit_risk_adj_lag)
-compare_alphas(remote_ed_mlogit_adj_lag, remote_ed_mlogit_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-remote_ed_logit_ext_comp <- update(remote_ed_logit_null, add_remote_comp)
-
-countsummary(remote_ed_logit_ext_comp)
-
-compare_alphas(remote_ed_logit_null, remote_ed_logit_ext_comp)
-
-compare_alphas(remote_ed_logit_lag, remote_ed_logit_ext_comp)
-
-### Compare to multilevel
-
-remote_ed_mlogit_ext_comp <- update(remote_ed_logit_ext_comp, add_cve)
-
-countsummary(remote_ed_mlogit_ext_comp)
-
-compare_nested(remote_ed_logit_ext_comp, remote_ed_mlogit_ext_comp)
-
-compare_alphas(remote_ed_mlogit_lag, remote_ed_mlogit_ext_comp)
-AICtab(remote_ed_mlogit_lag, remote_ed_mlogit_ext_comp)
-
-
-### Add risk heterogeneity
-
-remote_ed_logit_risk <- update(remote_ed_logit_null, add_risk)
-
-countsummary(remote_ed_logit_risk)
-
-compare_alphas(remote_ed_logit_null, remote_ed_logit_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_logit_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_logit_risk)
-
-### Add lag and compare
-
-remote_ed_logit_risk_ext_comp <- update(remote_ed_logit_risk, add_remote_comp)
-
-countsummary(remote_ed_logit_risk_ext_comp)
-
-compare_alphas(remote_ed_logit_risk_lag, remote_ed_logit_risk_ext_comp)
-AICtab(remote_ed_logit_risk_lag, remote_ed_logit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_logit_risk, remote_ed_logit_risk_ext_comp)
-compare_alphas(remote_ed_logit_risk, remote_ed_logit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_logit_ext_comp, remote_ed_logit_risk_ext_comp)
-compare_alphas(remote_ed_logit_ext_comp, remote_ed_logit_risk_ext_comp)
-
-### Add multilevel
-
-remote_ed_mlogit_risk <- update(remote_ed_logit_risk, add_cve)
-
-countsummary(remote_ed_mlogit_risk)
-
-compare_nested(remote_ed_logit_risk, remote_ed_mlogit_risk)
-
-## add lag
-
-remote_ed_mlogit_risk_ext_comp <- update(remote_ed_mlogit_risk, add_remote_comp)
-
-countsummary(remote_ed_mlogit_risk_ext_comp)
-
-compare_nested(remote_ed_logit_risk_ext_comp, remote_ed_mlogit_risk_ext_comp)
-
-compare_alphas(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_ext_comp)
-AICtab(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mlogit_risk, remote_ed_mlogit_risk_ext_comp)
-compare_alphas(remote_ed_mlogit_risk, remote_ed_mlogit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mlogit_ext_comp, remote_ed_mlogit_risk_ext_comp)
-compare_alphas(remote_ed_mlogit_ext_comp, remote_ed_mlogit_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-remote_ed_logit_binlag <- update(remote_ed_logit_null, add_remote_binlag)
-
-countsummary(remote_ed_logit_binlag)
-
-compare_alphas(remote_ed_logit_null, remote_ed_logit_binlag)
-
-compare_alphas(remote_ed_logit_lag, remote_ed_logit_binlag)
-
-### Compare to multilevel
-
-remote_ed_mlogit_binlag <- update(remote_ed_logit_binlag, add_cve)
-
-countsummary(remote_ed_mlogit_binlag)
-
-compare_nested(remote_ed_logit_binlag, remote_ed_mlogit_binlag)
-
-compare_alphas(remote_ed_mlogit_lag, remote_ed_mlogit_binlag)
-AICtab(remote_ed_mlogit_lag, remote_ed_mlogit_binlag)
-
-
-### Add risk heterogeneity
-
-remote_ed_logit_risk <- update(remote_ed_logit_null, add_risk)
-
-countsummary(remote_ed_logit_risk)
-
-compare_alphas(remote_ed_logit_null, remote_ed_logit_risk)
-
-# compare to poisson
-
-remote_ed_p_risk <- update(remote_ed_logit_risk, family = "poisson")
-
-lrtest(remote_ed_p_risk, remote_ed_logit_risk)
-
-### Add lag and compare
-
-remote_ed_logit_risk_binlag <- update(remote_ed_logit_risk, add_remote_binlag)
-
-countsummary(remote_ed_logit_risk_binlag)
-
-compare_alphas(remote_ed_logit_risk_lag, remote_ed_logit_risk_binlag)
-AICtab(remote_ed_logit_risk_lag, remote_ed_logit_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_logit_risk, remote_ed_logit_risk_binlag)
-compare_alphas(remote_ed_logit_risk, remote_ed_logit_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_logit_binlag, remote_ed_logit_risk_binlag)
-compare_alphas(remote_ed_logit_binlag, remote_ed_logit_risk_binlag)
-
-### Add multilevel
-
-remote_ed_mlogit_risk <- update(remote_ed_logit_risk, add_cve)
-
-countsummary(remote_ed_mlogit_risk)
-
-compare_nested(remote_ed_logit_risk, remote_ed_mlogit_risk)
-
-## add lag
-
-remote_ed_mlogit_risk_binlag <- update(remote_ed_mlogit_risk, add_remote_binlag)
-
-countsummary(remote_ed_mlogit_risk_binlag)
-
-compare_nested(remote_ed_logit_risk_binlag, remote_ed_mlogit_risk_binlag)
-
-compare_alphas(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_binlag)
-AICtab(remote_ed_mlogit_risk_lag, remote_ed_mlogit_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mlogit_risk, remote_ed_mlogit_risk_binlag)
-compare_alphas(remote_ed_mlogit_risk, remote_ed_mlogit_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mlogit_binlag, remote_ed_mlogit_risk_binlag)
-compare_alphas(remote_ed_mlogit_binlag, remote_ed_mlogit_risk_binlag)
-
+coef_csv(ed_rmt_mlogit_comp)
+coef_csv(ed_rmt_mlogit_risk_lag_comp)
 
 
 ```
 
-Next, estimate the effect of event dependence in the truncated count.
+
+Next, estimate the effect of event dependence on concentration.
+
+Begin with Poisson, (nb may be significant).
+Mutilevel not significant
+Use ADMB
+It appears only size is significant risk factor.
 
 ```{r remote-event-dependence-concentration}
 
-
 ## Use enve_lag_nm_sem1
 
-#### First test event dependence versus a null model
+ed_rmt_tp <- glmmadmb(remote ~ lag_remote,
+     data = subset(enve_lag_nm_sem1_nona, remote > 0),
+     family = "truncpoiss",
+     zeroInflation = FALSE,
+     admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
+     extra.args = "-ndi 60000")
 
-remote_ed_tnb_null <- update(remote_ed_nb_null,
-                             data = subset(enve_lag_nm_sem1, remote > 0),
-                             family = "truncated_nbinom2")
+countsummary(ed_rmt_tp)
 
-summary(remote_ed_tnb_null)
+## Is nb significant?
 
-### Test event dependence term (then repeat for adjusted and compliance cats)
+ed_rmt_tnb <- update(ed_rmt_tp, family = "truncnbinom")
 
-remote_ed_tnb_lag <- update(remote_ed_tnb_null, add_remote_lag)
+countsummary(ed_rmt_tnb)
 
-countsummary(remote_ed_tnb_lag)
+compare_nested(ed_rmt_tp, ed_rmt_tnb)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_lag)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_rmt_mtp <- update(ed_rmt_tp, add_nom)
 
-## Compare to poisson
+countsummary(ed_rmt_mtp)
 
-remote_ed_tp_lag <- update(remote_ed_tnb_lag,
-                           family = "truncated_poisson")
+compare_nested(ed_rmt_tp, ed_rmt_mtp)
 
-countsummary(remote_ed_tp_lag)
+#negbin
+ed_rmt_mtnb <- update(ed_rmt_tnb, add_nom)
 
-compare_nested(remote_ed_tp_lag, remote_ed_tnb_lag)
+countsummary(ed_rmt_mtnb)
 
-### Compare to multilevel
+compare_nested(ed_rmt_tnb, ed_rmt_mtnb)
 
-remote_ed_mtnb_lag <- update(remote_ed_tnb_lag, add_cve)
+compare_nested(ed_rmt_mtp, ed_rmt_mtnb)
 
-countsummary(remote_ed_mtnb_lag)
+### add risk heterogeneity: previous indicate only size is significant (also maybe subsector, drogas and general)
 
-compare_nested(remote_ed_tnb_lag, remote_ed_mtnb_lag)
+# compare to risk factors for prevalence
 
-### compare to multilevel poisson
+rmt_prv_risk <- update(formula(ed_rmt_mlogit_risk),
+                    remote ~ . - (1|NOM_ENT))
 
-remote_ed_mtp_lag <- update(remote_ed_tp_lag, add_cve)
+ed_rmt_tp_risk_full <- update(ed_rmt_tp, rmt_prv_risk)
 
-countsummary(remote_ed_mtp_lag)
+countsummary(ed_rmt_tp_risk_full)
 
-compare_nested(remote_ed_mtp_lag, remote_ed_mtnb_lag)
+## compare to previous results (only size sig)
 
-compare_nested(remote_ed_tp_lag, remote_ed_mtp_lag)
+ed_rmt_tp_risk_pars <- update(ed_rmt_tp, . ~ + size)
 
+countsummary(ed_rmt_tp_risk_pars)
 
-### Add risk heterogeneity
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_full)
 
-remote_ed_tnb_risk <- update(remote_ed_tnb_null, add_risk)
+# nb
 
-countsummary(remote_ed_tnb_risk)
+ed_rmt_tnb_risk_full <- update(ed_rmt_tp_risk_full,
+                    family = "truncnbinom")
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_risk)
+countsummary(ed_rmt_tnb_risk_full)
 
-# compare to poisson
+compare_nested(ed_rmt_tp_risk_full, ed_rmt_tnb_risk_full)
 
-remote_ed_tp_risk <- update(remote_ed_tnb_risk, family = "truncated_poisson")
+ed_rmt_tnb_risk_pars <- update(ed_rmt_tp_risk_pars,
+                    family = "truncnbinom")
 
-lrtest(remote_ed_tp_risk, remote_ed_tnb_risk)
+countsummary(ed_rmt_tnb_risk_pars)
 
-### Add lag and compare
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tnb_risk_pars)
+compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_full)
 
-remote_ed_tnb_risk_lag <- update(remote_ed_tnb_risk, add_remote_lag)
+## multilevel
 
-countsummary(remote_ed_tnb_risk_lag)
+ed_rmt_mtp_risk_full <- update(ed_rmt_tp_risk_full, add_nom)
 
-### Compare adding lag to risk
+countsummary(ed_rmt_mtp_risk_full)
 
-lrtest(remote_ed_tnb_risk, remote_ed_tnb_risk_lag)
-compare_alphas(remote_ed_tnb_risk, remote_ed_tnb_risk_lag)
+compare_nested(ed_rmt_tp_risk_full, ed_rmt_mtp_risk_full)
 
-## Compare adding risk to lag
+## compare to previous results (only size sig)
 
-lrtest(remote_ed_tnb_lag, remote_ed_tnb_risk_lag)
-compare_alphas(remote_ed_tnb_lag, remote_ed_tnb_risk_lag)
+ed_rmt_mtp_risk_pars <- update(ed_rmt_mtp, . ~ + size)
 
-## poisson risk lag
+countsummary(ed_rmt_mtp_risk_pars)
 
-remote_ed_tp_risk_lag <- update(remote_ed_tnb_risk_lag,
-                                family ="truncated_poisson")
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_mtp_risk_pars)
+compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_full)
 
-countsummary(remote_ed_tp_risk_lag)
-compare_nested(remote_ed_tp_risk_lag, remote_ed_tnb_risk_lag)
+# nb
 
-### Add multilevel
+ed_rmt_mtnb_risk_full <- update(ed_rmt_mtp_risk_full,
+                    family = "truncnbinom")
 
-remote_ed_mtnb_risk <- update(remote_ed_tnb_risk, add_cve)
+countsummary(ed_rmt_mtnb_risk_full)
 
-countsummary(remote_ed_mtnb_risk)
+compare_nested(ed_rmt_tnb_risk_full, ed_rmt_mtnb_risk_full)
+compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtnb_risk_full)
 
-compare_nested(remote_ed_tnb_risk, remote_ed_mtnb_risk)
+ed_rmt_mtnb_risk_pars <- update(ed_rmt_mtp_risk_pars,
+                    family = "truncnbinom")
 
-# multilevel poisson
+countsummary(ed_rmt_mtnb_risk_pars)
 
-remote_ed_mtp_risk <- update(remote_ed_tp_risk, add_cve)
+compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_mtnb_risk_pars)
+compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtnb_risk_pars)
+compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_full)
 
-countsummary(remote_ed_mtp_risk)
+## adding lag to risk model
+ed_rmt_tp_risk_pars_lag <- update(ed_rmt_tp_risk_pars,
+                        . ~ lag_remote + .)
 
-compare_nested(remote_ed_mtnb_risk, remote_ed_mtp_risk)
+countsummary(ed_rmt_tp_risk_pars_lag)
 
-compare_nested(remote_ed_tp_risk, remote_ed_mtp_risk)
+ed_rmt_tp_risk_lag <- update(ed_rmt_tp_risk_full,
+                        . ~ lag_remote + .)
 
-## add lag
+countsummary(ed_rmt_tp_risk_lag)
 
-remote_ed_mtnb_risk_lag <- update(remote_ed_mtnb_risk, add_remote_lag)
+compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_tp_risk_lag)
 
-countsummary(remote_ed_mtnb_risk_lag)
+### nb
 
-compare_nested(remote_ed_tnb_risk_lag, remote_ed_mtnb_risk_lag)
+ed_rmt_tnb_risk_pars_lag <- update(ed_rmt_tp_risk_pars_lag,
+                        family = "truncnbinom")
 
-### Compare adding lag to risk
+countsummary(ed_rmt_tnb_risk_pars_lag)
 
-lrtest(remote_ed_mtnb_risk, remote_ed_mtnb_risk_lag)
-compare_alphas(remote_ed_mtnb_risk, remote_ed_mtnb_risk_lag)
+compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_tnb_risk_pars_lag)
 
-## Compare adding risk to lag
+ed_rmt_tnb_risk_lag <- update(ed_rmt_tp_risk_lag,
+                        family = "truncnbinom")
 
-lrtest(remote_ed_mtnb_lag, remote_ed_mtnb_risk_lag)
-compare_alphas(remote_ed_mtnb_lag, remote_ed_mtnb_risk_lag)
+countsummary(ed_rmt_tnb_risk_lag)
 
-## m poisson risk lag
+compare_nested(ed_rmt_tp_risk_lag, ed_rmt_tnb_risk_lag)
 
-remote_ed_mtp_risk_lag <- update(remote_ed_mtnb_risk_lag,
-                                family ="truncated_poisson")
+compare_nested(ed_rmt_tnb_risk_pars_lag, ed_rmt_tnb_risk_lag)
 
-countsummary(remote_ed_mtp_risk_lag)
-compare_nested(remote_ed_mtp_risk_lag, remote_ed_mtnb_risk_lag)
+### multilevel
 
+ed_rmt_mtp_risk_pars_lag <- update(ed_rmt_tp_risk_pars_lag,
+                        add_nom)
 
-####### Test event dependence term using adjusted rate #######
+countsummary(ed_rmt_mtp_risk_pars_lag)
 
-remote_ed_tnb_adj_lag <- update(remote_ed_tnb_null, add_remote_adj_lag)
+compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_mtp_risk_pars_lag)
 
-countsummary(remote_ed_tnb_adj_lag)
+ed_rmt_mtp_risk_lag <- update(ed_rmt_tp_risk_lag,
+                        add_nom)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_adj_lag)
+countsummary(ed_rmt_mtp_risk_lag)
 
-compare_alphas(remote_ed_tnb_lag, remote_ed_tnb_adj_lag)
+compare_nested(ed_rmt_tp_risk_lag, ed_rmt_mtp_risk_lag)
 
-## Compare to poisson
+compare_nested(ed_rmt_mtp_risk_pars_lag, ed_rmt_mtp_risk_lag)
 
-remote_ed_tp_adj_lag <- update(remote_ed_tnb_adj_lag,
-                           family = "truncated_poisson")
+### mtnb
 
-countsummary(remote_ed_tp_adj_lag)
+ed_rmt_mtnb_risk_pars_lag <- update(ed_rmt_tnb_risk_pars_lag,
+                        add_nom)
 
-compare_nested(remote_ed_tp_adj_lag, remote_ed_tnb_adj_lag)
+countsummary(ed_rmt_mtnb_risk_pars_lag)
 
-### Compare to multilevel
+compare_nested(ed_rmt_tnb_risk_pars_lag, ed_rmt_mtnb_risk_pars_lag)
 
-remote_ed_mtnb_adj_lag <- update(remote_ed_tnb_adj_lag, add_cve)
+compare_nested(ed_rmt_mtp_risk_pars_lag, ed_rmt_mtnb_risk_pars_lag)
 
-countsummary(remote_ed_mtnb_adj_lag)
+ed_rmt_mtnb_risk_lag <- update(ed_rmt_tnb_risk_lag,
+                        add_nom)
 
-compare_nested(remote_ed_tnb_adj_lag, remote_ed_mtnb_adj_lag)
+countsummary(ed_rmt_mtnb_risk_lag)
 
-compare_alphas(remote_ed_mtnb_lag, remote_ed_mtnb_adj_lag)
-AICtab(remote_ed_mtnb_lag, remote_ed_mtnb_adj_lag)
+compare_nested(ed_rmt_tnb_risk_lag, ed_rmt_mtnb_risk_lag)
 
-### compare to multilevel poisson
+compare_nested(ed_rmt_mtp_risk_lag, ed_rmt_mtnb_risk_lag)
 
-remote_ed_mtp_adj_lag <- update(remote_ed_tp_adj_lag, add_cve)
+compare_nested(ed_rmt_mtnb_risk_pars_lag, ed_rmt_mtnb_risk_lag)
 
-countsummary(remote_ed_mtp_adj_lag)
 
-compare_nested(remote_ed_mtp_adj_lag, remote_ed_mtnb_adj_lag)
+## significance of risk to lag
 
-compare_nested(remote_ed_tp_adj_lag, remote_ed_mtp_adj_lag)
+compare_nested(ed_rmt_tp, ed_rmt_tp_risk_lag)
+compare_nested(ed_rmt_tp, ed_rmt_tp_risk_pars_lag)
 
+compare_nested(ed_rmt_tnb, ed_rmt_tnb_risk_lag)
+compare_nested(ed_rmt_tnb, ed_rmt_tnb_risk_pars_lag)
 
-### Add risk heterogeneity
+compare_nested(ed_rmt_mtp, ed_rmt_mtp_risk_lag)
+compare_nested(ed_rmt_mtp, ed_rmt_mtp_risk_pars_lag)
 
-remote_ed_tnb_risk <- update(remote_ed_tnb_null, add_risk)
+compare_nested(ed_rmt_mtnb, ed_rmt_mtnb_risk_lag)
+compare_nested(ed_rmt_mtnb, ed_rmt_mtnb_risk_pars_lag)
 
-countsummary(remote_ed_tnb_risk)
+## significance of lag to risk
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_risk)
+compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag)
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag)
 
-# compare to poisson
+compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag)
+compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag)
 
-remote_ed_tp_risk <- update(remote_ed_tnb_risk, family = "truncated_poisson")
+compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag)
+compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag)
 
-lrtest(remote_ed_tp_risk, remote_ed_tnb_risk)
+compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag)
+compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag)
 
-### Add lag and compare
+## save as csv
 
-remote_ed_tnb_risk_adj_lag <- update(remote_ed_tnb_risk, add_remote_adj_lag)
+coef_csv(ed_rmt_tp)
+coef_csv(ed_rmt_tp_risk_lag)
+coef_csv(ed_rmt_tp_risk_pars_lag)
 
-countsummary(remote_ed_tnb_risk_adj_lag)
+coef_csv(ed_rmt_tnb)
+coef_csv(ed_rmt_tnb_risk_lag)
+coef_csv(ed_rmt_tnb_risk_pars_lag)
 
-compare_alphas(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_adj_lag)
-AICtab(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_adj_lag)
+coef_csv(ed_rmt_mtp)
+coef_csv(ed_rmt_mtp_risk_lag)
+coef_csv(ed_rmt_mtp_risk_pars_lag)
 
-### Compare adding lag to risk
+coef_csv(ed_rmt_mtnb)
+coef_csv(ed_rmt_mtnb_risk_lag)
+coef_csv(ed_rmt_mtnb_risk_pars_lag)
 
-lrtest(remote_ed_tnb_risk, remote_ed_tnb_risk_adj_lag)
-compare_alphas(remote_ed_tnb_risk, remote_ed_tnb_risk_adj_lag)
+## repeat for adjusted lag
 
-## Compare adding risk to lag
+ed_rmt_tp_adj <- update(ed_rmt_tp, . ~ lag_rmt_adj)
 
-lrtest(remote_ed_tnb_adj_lag, remote_ed_tnb_risk_adj_lag)
-compare_alphas(remote_ed_tnb_adj_lag, remote_ed_tnb_risk_adj_lag)
+countsummary(ed_rmt_tp_adj)
+AICtab(ed_rmt_tp_adj, ed_rmt_tp)
 
-## poisson risk lag
+## Is nb significant?
 
-remote_ed_tp_risk_adj_lag <- update(remote_ed_tnb_risk_adj_lag,
-                                family ="truncated_poisson")
+ed_rmt_tnb_adj <- update(ed_rmt_tp_adj, family = "truncnbinom")
 
-countsummary(remote_ed_tp_risk_adj_lag)
-compare_nested(remote_ed_tp_risk_adj_lag, remote_ed_tnb_risk_adj_lag)
+countsummary(ed_rmt_tnb_adj)
 
-### Add multilevel
+compare_nested(ed_rmt_tp_adj, ed_rmt_tnb_adj)
 
-remote_ed_mtnb_risk <- update(remote_ed_tnb_risk, add_cve)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_rmt_mtp_adj <- update(ed_rmt_tp_adj, add_nom)
 
-countsummary(remote_ed_mtnb_risk)
+countsummary(ed_rmt_mtp_adj)
 
-compare_nested(remote_ed_tnb_risk, remote_ed_mtnb_risk)
+compare_nested(ed_rmt_tp_adj, ed_rmt_mtp_adj)
 
-# multilevel poisson
+#negbin
+ed_rmt_mtnb_adj <- update(ed_rmt_tnb_adj, add_nom)
 
-remote_ed_mtp_risk <- update(remote_ed_tp_risk, add_cve)
+countsummary(ed_rmt_mtnb_adj)
 
-countsummary(remote_ed_mtp_risk)
+compare_nested(ed_rmt_tnb_adj, ed_rmt_mtnb_adj)
 
-compare_nested(remote_ed_mtnb_risk, remote_ed_mtp_risk)
+compare_nested(ed_rmt_mtp_adj, ed_rmt_mtnb_adj)
 
-compare_nested(remote_ed_tp_risk, remote_ed_mtp_risk)
 
-## add lag
+## adding lag to risk model
+ed_rmt_tp_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars,
+                        . ~ lag_rmt_adj + .)
 
-remote_ed_mtnb_risk_adj_lag <- update(remote_ed_mtnb_risk, add_remote_adj_lag)
+countsummary(ed_rmt_tp_risk_pars_lag_adj)
 
-countsummary(remote_ed_mtnb_risk_adj_lag)
+ed_rmt_tp_risk_lag_adj <- update(ed_rmt_tp_risk_full,
+                        . ~ lag_rmt_adj + .)
 
-compare_nested(remote_ed_tnb_risk_adj_lag, remote_ed_mtnb_risk_adj_lag)
+countsummary(ed_rmt_tp_risk_lag_adj)
 
-compare_alphas(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_adj_lag)
-AICtab(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_adj_lag)
+compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_tp_risk_lag_adj)
 
-### Compare adding lag to risk
+### nb
 
-lrtest(remote_ed_mtnb_risk, remote_ed_mtnb_risk_adj_lag)
-compare_alphas(remote_ed_mtnb_risk, remote_ed_mtnb_risk_adj_lag)
+ed_rmt_tnb_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars_lag_adj,
+                        family = "truncnbinom")
 
-## Compare adding risk to lag
+countsummary(ed_rmt_tnb_risk_pars_lag_adj)
 
-lrtest(remote_ed_mtnb_adj_lag, remote_ed_mtnb_risk_adj_lag)
-compare_alphas(remote_ed_mtnb_adj_lag, remote_ed_mtnb_risk_adj_lag)
+compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_tnb_risk_pars_lag_adj)
 
-## m poisson risk lag
+ed_rmt_tnb_risk_lag_adj <- update(ed_rmt_tp_risk_lag_adj,
+                        family = "truncnbinom")
 
-remote_ed_mtp_risk_adj_lag <- update(remote_ed_mtnb_risk_adj_lag,
-                                family ="truncated_poisson")
+countsummary(ed_rmt_tnb_risk_lag_adj)
 
-countsummary(remote_ed_mtp_risk_adj_lag)
-compare_nested(remote_ed_mtp_risk_adj_lag, remote_ed_mtnb_risk_adj_lag)
+compare_nested(ed_rmt_tp_risk_lag_adj, ed_rmt_tnb_risk_lag_adj)
 
-####### Test event dependence term using compliance cats #######
+compare_nested(ed_rmt_tnb_risk_pars_lag_adj, ed_rmt_tnb_risk_lag_adj)
 
-remote_ed_tnb_ext_comp <- update(remote_ed_tnb_null, add_remote_comp)
+### multilevel
 
-countsummary(remote_ed_tnb_ext_comp)
+ed_rmt_mtp_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars_lag_adj,
+                        add_nom)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_ext_comp)
+countsummary(ed_rmt_mtp_risk_pars_lag_adj)
 
-compare_alphas(remote_ed_tnb_lag, remote_ed_tnb_ext_comp)
+compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_mtp_risk_pars_lag_adj)
 
-## Compare to poisson
+ed_rmt_mtp_risk_lag_adj <- update(ed_rmt_tp_risk_lag_adj,
+                        add_nom)
 
-remote_ed_tp_ext_comp <- update(remote_ed_tnb_ext_comp,
-                           family = "truncated_poisson")
+countsummary(ed_rmt_mtp_risk_lag_adj)
 
-countsummary(remote_ed_tp_ext_comp)
+compare_nested(ed_rmt_tp_risk_lag_adj, ed_rmt_mtp_risk_lag_adj)
 
-compare_nested(remote_ed_tp_ext_comp, remote_ed_tnb_ext_comp)
+compare_nested(ed_rmt_mtp_risk_pars_lag_adj, ed_rmt_mtp_risk_lag_adj)
 
-### Compare to multilevel
+### mtnb
 
-remote_ed_mtnb_ext_comp <- update(remote_ed_tnb_ext_comp, add_cve)
+ed_rmt_mtnb_risk_pars_lag_adj <- update(ed_rmt_tnb_risk_pars_lag_adj,
+                        add_nom)
 
-countsummary(remote_ed_mtnb_ext_comp)
+countsummary(ed_rmt_mtnb_risk_pars_lag_adj)
 
-compare_nested(remote_ed_tnb_ext_comp, remote_ed_mtnb_ext_comp)
+compare_nested(ed_rmt_tnb_risk_pars_lag_adj, ed_rmt_mtnb_risk_pars_lag_adj)
 
-compare_alphas(remote_ed_mtnb_lag, remote_ed_mtnb_ext_comp)
-AICtab(remote_ed_mtnb_lag, remote_ed_mtnb_ext_comp)
+compare_nested(ed_rmt_mtp_risk_pars_lag_adj, ed_rmt_mtnb_risk_pars_lag_adj)
 
-### compare to multilevel poisson
+ed_rmt_mtnb_risk_lag_adj <- update(ed_rmt_tnb_risk_lag_adj,
+                        add_nom)
 
-remote_ed_mtp_ext_comp <- update(remote_ed_tp_ext_comp, add_cve)
+countsummary(ed_rmt_mtnb_risk_lag_adj)
 
-countsummary(remote_ed_mtp_ext_comp)
+compare_nested(ed_rmt_tnb_risk_lag_adj, ed_rmt_mtnb_risk_lag_adj)
 
-compare_nested(remote_ed_mtp_ext_comp, remote_ed_mtnb_ext_comp)
+compare_nested(ed_rmt_mtp_risk_lag_adj, ed_rmt_mtnb_risk_lag_adj)
 
-compare_nested(remote_ed_tp_ext_comp, remote_ed_mtp_ext_comp)
+compare_nested(ed_rmt_mtnb_risk_pars_lag_adj, ed_rmt_mtnb_risk_lag_adj)
 
 
-### Add risk heterogeneity
+## significance of risk to lag
 
-remote_ed_tnb_risk <- update(remote_ed_tnb_null, add_risk)
+compare_nested(ed_rmt_tp_adj, ed_rmt_tp_risk_lag_adj)
+compare_nested(ed_rmt_tp_adj, ed_rmt_tp_risk_pars_lag_adj)
 
-countsummary(remote_ed_tnb_risk)
+compare_nested(ed_rmt_tnb_adj, ed_rmt_tnb_risk_lag_adj)
+compare_nested(ed_rmt_tnb_adj, ed_rmt_tnb_risk_pars_lag_adj)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_risk)
+compare_nested(ed_rmt_mtp_adj, ed_rmt_mtp_risk_lag_adj)
+compare_nested(ed_rmt_mtp_adj, ed_rmt_mtp_risk_pars_lag_adj)
 
-# compare to poisson
+compare_nested(ed_rmt_mtnb_adj, ed_rmt_mtnb_risk_lag_adj)
+compare_nested(ed_rmt_mtnb_adj, ed_rmt_mtnb_risk_pars_lag_adj)
 
-remote_ed_tp_risk <- update(remote_ed_tnb_risk, family = "truncated_poisson")
+## significance of lag to risk
 
-lrtest(remote_ed_tp_risk, remote_ed_tnb_risk)
+compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag_adj)
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag_adj)
 
-### Add lag and compare
+compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag_adj)
+compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag_adj)
 
-remote_ed_tnb_risk_ext_comp <- update(remote_ed_tnb_risk, add_remote_comp)
+compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag_adj)
+compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag_adj)
 
-countsummary(remote_ed_tnb_risk_ext_comp)
+compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag_adj)
+compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag_adj)
 
-compare_alphas(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_ext_comp)
-AICtab(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_ext_comp)
+## save as csv
 
-### Compare adding lag to risk
+coef_csv(ed_rmt_tp_adj)
+coef_csv(ed_rmt_tp_risk_lag_adj)
+coef_csv(ed_rmt_tp_risk_pars_lag_adj)
 
-lrtest(remote_ed_tnb_risk, remote_ed_tnb_risk_ext_comp)
-compare_alphas(remote_ed_tnb_risk, remote_ed_tnb_risk_ext_comp)
+coef_csv(ed_rmt_tnb_adj)
+coef_csv(ed_rmt_tnb_risk_lag_adj)
+coef_csv(ed_rmt_tnb_risk_pars_lag_adj)
 
-## Compare adding risk to lag
+coef_csv(ed_rmt_mtp_adj)
+coef_csv(ed_rmt_mtp_risk_lag_adj)
+coef_csv(ed_rmt_mtp_risk_pars_lag_adj)
 
-lrtest(remote_ed_tnb_ext_comp, remote_ed_tnb_risk_ext_comp)
-compare_alphas(remote_ed_tnb_ext_comp, remote_ed_tnb_risk_ext_comp)
+coef_csv(ed_rmt_mtnb_adj)
+coef_csv(ed_rmt_mtnb_risk_lag_adj)
+coef_csv(ed_rmt_mtnb_risk_pars_lag_adj)
 
-## poisson risk lag
 
-remote_ed_tp_risk_ext_comp <- update(remote_ed_tnb_risk_ext_comp,
-                                family ="truncated_poisson")
+## repeat for comp lag categories
 
-countsummary(remote_ed_tp_risk_ext_comp)
-compare_nested(remote_ed_tp_risk_ext_comp, remote_ed_tnb_risk_ext_comp)
+ed_rmt_tp_comp <- update(ed_rmt_tp, . ~ lag_rmt_comp_cat)
 
-### Add multilevel
+countsummary(ed_rmt_tp_comp)
+AICtab(ed_rmt_tp_comp, ed_rmt_tp_adj, ed_rmt_tp)
 
-remote_ed_mtnb_risk <- update(remote_ed_tnb_risk, add_cve)
+## Is nb significant?
 
-countsummary(remote_ed_mtnb_risk)
+ed_rmt_tnb_comp <- update(ed_rmt_tp_comp, family = "truncnbinom")
 
-compare_nested(remote_ed_tnb_risk, remote_ed_mtnb_risk)
+countsummary(ed_rmt_tnb_comp)
 
-# multilevel poisson
+compare_nested(ed_rmt_tp_comp, ed_rmt_tnb_comp)
 
-remote_ed_mtp_risk <- update(remote_ed_tp_risk, add_cve)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_rmt_mtp_comp <- update(ed_rmt_tp_comp, add_nom)
 
-countsummary(remote_ed_mtp_risk)
+countsummary(ed_rmt_mtp_comp)
 
-compare_nested(remote_ed_mtnb_risk, remote_ed_mtp_risk)
+compare_nested(ed_rmt_tp_comp, ed_rmt_mtp_comp)
 
-compare_nested(remote_ed_tp_risk, remote_ed_mtp_risk)
+#negbin
+ed_rmt_mtnb_comp <- update(ed_rmt_tnb_comp, add_nom)
 
-## add lag
+countsummary(ed_rmt_mtnb_comp)
 
-remote_ed_mtnb_risk_ext_comp <- update(remote_ed_mtnb_risk, add_remote_comp)
+compare_nested(ed_rmt_tnb_comp, ed_rmt_mtnb_comp)
 
-countsummary(remote_ed_mtnb_risk_ext_comp)
+compare_nested(ed_rmt_mtp_comp, ed_rmt_mtnb_comp)
 
-compare_nested(remote_ed_tnb_risk_ext_comp, remote_ed_mtnb_risk_ext_comp)
 
-compare_alphas(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_ext_comp)
-AICtab(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_ext_comp)
+## adding lag to risk model
+ed_rmt_tp_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars,
+                        . ~ lag_rmt_comp_cat + .)
 
-### Compare adding lag to risk
+countsummary(ed_rmt_tp_risk_pars_lag_comp)
 
-lrtest(remote_ed_mtnb_risk, remote_ed_mtnb_risk_ext_comp)
-compare_alphas(remote_ed_mtnb_risk, remote_ed_mtnb_risk_ext_comp)
+ed_rmt_tp_risk_lag_comp <- update(ed_rmt_tp_risk_full,
+                        . ~ lag_rmt_comp_cat + .)
 
-## Compare adding risk to lag
+countsummary(ed_rmt_tp_risk_lag_comp)
 
-lrtest(remote_ed_mtnb_ext_comp, remote_ed_mtnb_risk_ext_comp)
-compare_alphas(remote_ed_mtnb_ext_comp, remote_ed_mtnb_risk_ext_comp)
+compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_tp_risk_lag_comp)
 
-## m poisson risk lag
+### nb
 
-remote_ed_mtp_risk_ext_comp <- update(remote_ed_mtnb_risk_ext_comp,
-                                family ="truncated_poisson")
+ed_rmt_tnb_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars_lag_comp,
+                        family = "truncnbinom")
 
-countsummary(remote_ed_mtp_risk_ext_comp)
-compare_nested(remote_ed_mtp_risk_ext_comp, remote_ed_mtnb_risk_ext_comp)
+countsummary(ed_rmt_tnb_risk_pars_lag_comp)
 
+compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_tnb_risk_pars_lag_comp)
 
-####### Test event dependence term using binary lag #######
+ed_rmt_tnb_risk_lag_comp <- update(ed_rmt_tp_risk_lag_comp,
+                        family = "truncnbinom")
 
-remote_ed_tnb_binlag <- update(remote_ed_tnb_null, add_remote_binlag)
+countsummary(ed_rmt_tnb_risk_lag_comp)
 
-countsummary(remote_ed_tnb_binlag)
+compare_nested(ed_rmt_tp_risk_lag_comp, ed_rmt_tnb_risk_lag_comp)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_binlag)
+compare_nested(ed_rmt_tnb_risk_pars_lag_comp, ed_rmt_tnb_risk_lag_comp)
 
-compare_alphas(remote_ed_tnb_lag, remote_ed_tnb_binlag)
+### multilevel
 
-## Compare to poisson
+ed_rmt_mtp_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars_lag_comp,
+                        add_nom)
 
-remote_ed_tp_binlag <- update(remote_ed_tnb_binlag,
-                           family = "truncated_poisson")
+countsummary(ed_rmt_mtp_risk_pars_lag_comp)
 
-countsummary(remote_ed_tp_binlag)
+compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_mtp_risk_pars_lag_comp)
 
-compare_nested(remote_ed_tp_binlag, remote_ed_tnb_binlag)
+ed_rmt_mtp_risk_lag_comp <- update(ed_rmt_tp_risk_lag_comp,
+                        add_nom)
 
-### Compare to multilevel
+countsummary(ed_rmt_mtp_risk_lag_comp)
 
-remote_ed_mtnb_binlag <- update(remote_ed_tnb_binlag, add_cve)
+compare_nested(ed_rmt_tp_risk_lag_comp, ed_rmt_mtp_risk_lag_comp)
 
-countsummary(remote_ed_mtnb_binlag)
+compare_nested(ed_rmt_mtp_risk_pars_lag_comp, ed_rmt_mtp_risk_lag_comp)
 
-compare_nested(remote_ed_tnb_binlag, remote_ed_mtnb_binlag)
+### mtnb
 
-compare_alphas(remote_ed_mtnb_lag, remote_ed_mtnb_binlag)
-AICtab(remote_ed_mtnb_lag, remote_ed_mtnb_binlag)
+ed_rmt_mtnb_risk_pars_lag_comp <- update(ed_rmt_tnb_risk_pars_lag_comp,
+                        add_nom)
 
-### compare to multilevel poisson
+countsummary(ed_rmt_mtnb_risk_pars_lag_comp)
 
-remote_ed_mtp_binlag <- update(remote_ed_tp_binlag, add_cve)
+compare_nested(ed_rmt_tnb_risk_pars_lag_comp, ed_rmt_mtnb_risk_pars_lag_comp)
 
-countsummary(remote_ed_mtp_binlag)
+compare_nested(ed_rmt_mtp_risk_pars_lag_comp, ed_rmt_mtnb_risk_pars_lag_comp)
 
-compare_nested(remote_ed_mtp_binlag, remote_ed_mtnb_binlag)
+ed_rmt_mtnb_risk_lag_comp <- update(ed_rmt_tnb_risk_lag_comp,
+                        add_nom)
 
-compare_nested(remote_ed_tp_binlag, remote_ed_mtp_binlag)
+countsummary(ed_rmt_mtnb_risk_lag_comp)
 
+compare_nested(ed_rmt_tnb_risk_lag_comp, ed_rmt_mtnb_risk_lag_comp)
 
-### Add risk heterogeneity
+compare_nested(ed_rmt_mtp_risk_lag_comp, ed_rmt_mtnb_risk_lag_comp)
 
-remote_ed_tnb_risk <- update(remote_ed_tnb_null, add_risk)
+compare_nested(ed_rmt_mtnb_risk_pars_lag_comp, ed_rmt_mtnb_risk_lag_comp)
 
-countsummary(remote_ed_tnb_risk)
 
-compare_alphas(remote_ed_tnb_null, remote_ed_tnb_risk)
+## significance of risk to lag
 
-# compare to poisson
+compare_nested(ed_rmt_tp_comp, ed_rmt_tp_risk_lag_comp)
+compare_nested(ed_rmt_tp_comp, ed_rmt_tp_risk_pars_lag_comp)
 
-remote_ed_tp_risk <- update(remote_ed_tnb_risk, family = "truncated_poisson")
+compare_nested(ed_rmt_tnb_comp, ed_rmt_tnb_risk_lag_comp)
+compare_nested(ed_rmt_tnb_comp, ed_rmt_tnb_risk_pars_lag_comp)
 
-lrtest(remote_ed_tp_risk, remote_ed_tnb_risk)
+compare_nested(ed_rmt_mtp_comp, ed_rmt_mtp_risk_lag_comp)
+compare_nested(ed_rmt_mtp_comp, ed_rmt_mtp_risk_pars_lag_comp)
 
-### Add lag and compare
+compare_nested(ed_rmt_mtnb_comp, ed_rmt_mtnb_risk_lag_comp)
+compare_nested(ed_rmt_mtnb_comp, ed_rmt_mtnb_risk_pars_lag_comp)
 
-remote_ed_tnb_risk_binlag <- update(remote_ed_tnb_risk, add_remote_binlag)
+## significance of lag to risk
 
-countsummary(remote_ed_tnb_risk_binlag)
+compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag_comp)
+compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag_comp)
 
-compare_alphas(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_binlag)
-AICtab(remote_ed_tnb_risk_lag, remote_ed_tnb_risk_binlag)
+compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag_comp)
+compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag_comp)
 
-### Compare adding lag to risk
+compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag_comp)
+compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag_comp)
 
-lrtest(remote_ed_tnb_risk, remote_ed_tnb_risk_binlag)
-compare_alphas(remote_ed_tnb_risk, remote_ed_tnb_risk_binlag)
+compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag_comp)
+compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag_comp)
 
-## Compare adding risk to lag
+## save as csv
 
-lrtest(remote_ed_tnb_binlag, remote_ed_tnb_risk_binlag)
-compare_alphas(remote_ed_tnb_binlag, remote_ed_tnb_risk_binlag)
+coef_csv(ed_rmt_tp_comp)
+coef_csv(ed_rmt_tp_risk_lag_comp)
+coef_csv(ed_rmt_tp_risk_pars_lag_comp)
 
-## poisson risk lag
+coef_csv(ed_rmt_tnb_comp)
+coef_csv(ed_rmt_tnb_risk_lag_comp)
+coef_csv(ed_rmt_tnb_risk_pars_lag_comp)
 
-remote_ed_tp_risk_binlag <- update(remote_ed_tnb_risk_binlag,
-                                family ="truncated_poisson")
+coef_csv(ed_rmt_mtp_comp)
+coef_csv(ed_rmt_mtp_risk_lag_comp)
+coef_csv(ed_rmt_mtp_risk_pars_lag_comp)
 
-countsummary(remote_ed_tp_risk_binlag)
-compare_nested(remote_ed_tp_risk_binlag, remote_ed_tnb_risk_binlag)
-
-### Add multilevel
-
-remote_ed_mtnb_risk <- update(remote_ed_tnb_risk, add_cve)
-
-countsummary(remote_ed_mtnb_risk)
-
-compare_nested(remote_ed_tnb_risk, remote_ed_mtnb_risk)
-
-# multilevel poisson
-
-remote_ed_mtp_risk <- update(remote_ed_tp_risk, add_cve)
-
-countsummary(remote_ed_mtp_risk)
-
-compare_nested(remote_ed_mtnb_risk, remote_ed_mtp_risk)
-
-compare_nested(remote_ed_tp_risk, remote_ed_mtp_risk)
-
-## add lag
-
-remote_ed_mtnb_risk_binlag <- update(remote_ed_mtnb_risk, add_remote_binlag)
-
-countsummary(remote_ed_mtnb_risk_binlag)
-
-compare_nested(remote_ed_tnb_risk_binlag, remote_ed_mtnb_risk_binlag)
-
-compare_alphas(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_binlag)
-AICtab(remote_ed_mtnb_risk_lag, remote_ed_mtnb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_ed_mtnb_risk, remote_ed_mtnb_risk_binlag)
-compare_alphas(remote_ed_mtnb_risk, remote_ed_mtnb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_ed_mtnb_binlag, remote_ed_mtnb_risk_binlag)
-compare_alphas(remote_ed_mtnb_binlag, remote_ed_mtnb_risk_binlag)
-
-## m poisson risk lag
-
-remote_ed_mtp_risk_binlag <- update(remote_ed_mtnb_risk_binlag,
-                                family ="truncated_poisson")
-
-countsummary(remote_ed_mtp_risk_binlag)
-compare_nested(remote_ed_mtp_risk_binlag, remote_ed_mtnb_risk_binlag)
-
+coef_csv(ed_rmt_mtnb_comp)
+coef_csv(ed_rmt_mtnb_risk_lag_comp)
+coef_csv(ed_rmt_mtnb_risk_pars_lag_comp)
 
 
 ```
 
-Repeat using glmmADMB
-
-
-```{r remote-event-dependence-concentration-glmmADMB}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-remote_admb_ed_tnb_null <- glmmadmb(formula(remote_ed_tnb_null),
-                             data = subset(enve_lag_nm_sem1, remote > 0),
-                             family = "truncnbinom",
-                             zeroInflation = FALSE,
-                             admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
-                             extra.args = "-ndi 60000")
-
-summary(remote_admb_ed_tnb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-remote_admb_ed_tnb_lag <- update(remote_admb_ed_tnb_null, add_remote_lag)
-
-countsummary(remote_admb_ed_tnb_lag)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_lag)
-
-## Compare to poisson
-
-remote_admb_ed_tp_lag <- update(remote_admb_ed_tnb_lag,
-                           family = "truncpoiss")
-
-countsummary(remote_admb_ed_tp_lag)
-
-compare_nested(remote_admb_ed_tp_lag, remote_admb_ed_tnb_lag)
-
-### Compare to multilevel
-
-remote_admb_ed_mtnb_lag <- update(remote_admb_ed_tnb_lag, add_nom)
-
-countsummary(remote_admb_ed_mtnb_lag)
-
-compare_nested(remote_admb_ed_tnb_lag, remote_admb_ed_mtnb_lag)
-
-### compare to multilevel poisson
-
-remote_admb_ed_mtp_lag <- update(remote_admb_ed_tp_lag, add_nom)
-
-countsummary(remote_admb_ed_mtp_lag)
-
-compare_nested(remote_admb_ed_mtp_lag, remote_admb_ed_mtnb_lag)
-
-compare_nested(remote_admb_ed_tp_lag, remote_admb_ed_mtp_lag)
-
-
-### Add risk heterogeneity
-
-remote_admb_ed_tnb_risk <- update(remote_admb_ed_tnb_null, add_risk)
-
-countsummary(remote_admb_ed_tnb_risk)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_risk)
-
-# compare to poisson
-
-remote_admb_ed_tp_risk <- update(remote_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(remote_admb_ed_tp_risk, remote_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-remote_admb_ed_tnb_risk_lag <- update(remote_admb_ed_tnb_risk, add_remote_lag)
-
-countsummary(remote_admb_ed_tnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_lag)
-compare_alphas(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_tnb_lag, remote_admb_ed_tnb_risk_lag)
-compare_alphas(remote_admb_ed_tnb_lag, remote_admb_ed_tnb_risk_lag)
-
-## poisson risk lag
-
-remote_admb_ed_tp_risk_lag <- update(remote_admb_ed_tnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_tp_risk_lag)
-compare_nested(remote_admb_ed_tp_risk_lag, remote_admb_ed_tnb_risk_lag)
-
-### Add multilevel
-
-remote_admb_ed_mtnb_risk <- update(remote_admb_ed_tnb_risk, add_nom)
-
-countsummary(remote_admb_ed_mtnb_risk)
-
-compare_nested(remote_admb_ed_tnb_risk, remote_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-remote_admb_ed_mtp_risk <- update(remote_admb_ed_tp_risk, add_nom)
-
-countsummary(remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_mtnb_risk, remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_tp_risk, remote_admb_ed_mtp_risk)
-
-## add lag
-
-remote_admb_ed_mtnb_risk_lag <- update(remote_admb_ed_mtnb_risk, add_remote_lag)
-
-countsummary(remote_admb_ed_mtnb_risk_lag)
-
-compare_nested(remote_admb_ed_tnb_risk_lag, remote_admb_ed_mtnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_lag)
-compare_alphas(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_risk_lag)
-compare_alphas(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_risk_lag)
-
-## m poisson risk lag
-
-remote_admb_ed_mtp_risk_lag <- update(remote_admb_ed_mtnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_mtp_risk_lag)
-compare_nested(remote_admb_ed_mtp_risk_lag, remote_admb_ed_mtnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-remote_admb_ed_tnb_adj_lag <- update(remote_admb_ed_tnb_null, add_remote_adj_lag)
-
-countsummary(remote_admb_ed_tnb_adj_lag)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_adj_lag)
-
-compare_alphas(remote_admb_ed_tnb_lag, remote_admb_ed_tnb_adj_lag)
-
-## Compare to poisson
-
-remote_admb_ed_tp_adj_lag <- update(remote_admb_ed_tnb_adj_lag,
-                           family = "truncpoiss")
-
-countsummary(remote_admb_ed_tp_adj_lag)
-
-compare_nested(remote_admb_ed_tp_adj_lag, remote_admb_ed_tnb_adj_lag)
-
-### Compare to multilevel
-
-remote_admb_ed_mtnb_adj_lag <- update(remote_admb_ed_tnb_adj_lag, add_nom)
-
-countsummary(remote_admb_ed_mtnb_adj_lag)
-
-compare_nested(remote_admb_ed_tnb_adj_lag, remote_admb_ed_mtnb_adj_lag)
-
-compare_alphas(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_adj_lag)
-AICtab(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_adj_lag)
-
-### compare to multilevel poisson
-
-remote_admb_ed_mtp_adj_lag <- update(remote_admb_ed_tp_adj_lag, add_nom)
-
-countsummary(remote_admb_ed_mtp_adj_lag)
-
-compare_nested(remote_admb_ed_mtp_adj_lag, remote_admb_ed_mtnb_adj_lag)
-
-compare_nested(remote_admb_ed_tp_adj_lag, remote_admb_ed_mtp_adj_lag)
-
-
-### Add risk heterogeneity
-
-remote_admb_ed_tnb_risk <- update(remote_admb_ed_tnb_null, add_risk)
-
-countsummary(remote_admb_ed_tnb_risk)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_risk)
-
-# compare to poisson
-
-remote_admb_ed_tp_risk <- update(remote_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(remote_admb_ed_tp_risk, remote_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-remote_admb_ed_tnb_risk_adj_lag <- update(remote_admb_ed_tnb_risk, add_remote_adj_lag)
-
-countsummary(remote_admb_ed_tnb_risk_adj_lag)
-
-compare_alphas(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_adj_lag)
-AICtab(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_adj_lag)
-compare_alphas(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_tnb_adj_lag, remote_admb_ed_tnb_risk_adj_lag)
-compare_alphas(remote_admb_ed_tnb_adj_lag, remote_admb_ed_tnb_risk_adj_lag)
-
-## poisson risk lag
-
-remote_admb_ed_tp_risk_adj_lag <- update(remote_admb_ed_tnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_tp_risk_adj_lag)
-compare_nested(remote_admb_ed_tp_risk_adj_lag, remote_admb_ed_tnb_risk_adj_lag)
-
-### Add multilevel
-
-remote_admb_ed_mtnb_risk <- update(remote_admb_ed_tnb_risk, add_nom)
-
-countsummary(remote_admb_ed_mtnb_risk)
-
-compare_nested(remote_admb_ed_tnb_risk, remote_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-remote_admb_ed_mtp_risk <- update(remote_admb_ed_tp_risk, add_nom)
-
-countsummary(remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_mtnb_risk, remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_tp_risk, remote_admb_ed_mtp_risk)
-
-## add lag
-
-remote_admb_ed_mtnb_risk_adj_lag <- update(remote_admb_ed_mtnb_risk, add_remote_adj_lag)
-
-countsummary(remote_admb_ed_mtnb_risk_adj_lag)
-
-compare_nested(remote_admb_ed_tnb_risk_adj_lag, remote_admb_ed_mtnb_risk_adj_lag)
-
-compare_alphas(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_adj_lag)
-AICtab(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_mtnb_adj_lag, remote_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(remote_admb_ed_mtnb_adj_lag, remote_admb_ed_mtnb_risk_adj_lag)
-
-## m poisson risk lag
-
-remote_admb_ed_mtp_risk_adj_lag <- update(remote_admb_ed_mtnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_mtp_risk_adj_lag)
-compare_nested(remote_admb_ed_mtp_risk_adj_lag, remote_admb_ed_mtnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-remote_admb_ed_tnb_ext_comp <- update(remote_admb_ed_tnb_null, add_remote_comp)
-
-countsummary(remote_admb_ed_tnb_ext_comp)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_ext_comp)
-
-compare_alphas(remote_admb_ed_tnb_lag, remote_admb_ed_tnb_ext_comp)
-
-## Compare to poisson
-
-remote_admb_ed_tp_ext_comp <- update(remote_admb_ed_tnb_ext_comp,
-                           family = "truncpoiss")
-
-countsummary(remote_admb_ed_tp_ext_comp)
-
-compare_nested(remote_admb_ed_tp_ext_comp, remote_admb_ed_tnb_ext_comp)
-
-### Compare to multilevel
-
-remote_admb_ed_mtnb_ext_comp <- update(remote_admb_ed_tnb_ext_comp, add_nom)
-
-countsummary(remote_admb_ed_mtnb_ext_comp)
-
-compare_nested(remote_admb_ed_tnb_ext_comp, remote_admb_ed_mtnb_ext_comp)
-
-compare_alphas(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_ext_comp)
-AICtab(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_ext_comp)
-
-### compare to multilevel poisson
-
-remote_admb_ed_mtp_ext_comp <- update(remote_admb_ed_tp_ext_comp, add_nom)
-
-countsummary(remote_admb_ed_mtp_ext_comp)
-
-compare_nested(remote_admb_ed_mtp_ext_comp, remote_admb_ed_mtnb_ext_comp)
-
-compare_nested(remote_admb_ed_tp_ext_comp, remote_admb_ed_mtp_ext_comp)
-
-
-### Add risk heterogeneity
-
-remote_admb_ed_tnb_risk <- update(remote_admb_ed_tnb_null, add_risk)
-
-countsummary(remote_admb_ed_tnb_risk)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_risk)
-
-# compare to poisson
-
-remote_admb_ed_tp_risk <- update(remote_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(remote_admb_ed_tp_risk, remote_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-remote_admb_ed_tnb_risk_ext_comp <- update(remote_admb_ed_tnb_risk, add_remote_comp)
-
-countsummary(remote_admb_ed_tnb_risk_ext_comp)
-
-compare_alphas(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_ext_comp)
-AICtab(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_ext_comp)
-compare_alphas(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_tnb_ext_comp, remote_admb_ed_tnb_risk_ext_comp)
-compare_alphas(remote_admb_ed_tnb_ext_comp, remote_admb_ed_tnb_risk_ext_comp)
-
-## poisson risk lag
-
-remote_admb_ed_tp_risk_ext_comp <- update(remote_admb_ed_tnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_tp_risk_ext_comp)
-compare_nested(remote_admb_ed_tp_risk_ext_comp, remote_admb_ed_tnb_risk_ext_comp)
-
-### Add multilevel
-
-remote_admb_ed_mtnb_risk <- update(remote_admb_ed_tnb_risk, add_nom)
-
-countsummary(remote_admb_ed_mtnb_risk)
-
-compare_nested(remote_admb_ed_tnb_risk, remote_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-remote_admb_ed_mtp_risk <- update(remote_admb_ed_tp_risk, add_nom)
-
-countsummary(remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_mtnb_risk, remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_tp_risk, remote_admb_ed_mtp_risk)
-
-## add lag
-
-remote_admb_ed_mtnb_risk_ext_comp <- update(remote_admb_ed_mtnb_risk, add_remote_comp)
-
-countsummary(remote_admb_ed_mtnb_risk_ext_comp)
-
-compare_nested(remote_admb_ed_tnb_risk_ext_comp, remote_admb_ed_mtnb_risk_ext_comp)
-
-compare_alphas(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_ext_comp)
-AICtab(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_mtnb_ext_comp, remote_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(remote_admb_ed_mtnb_ext_comp, remote_admb_ed_mtnb_risk_ext_comp)
-
-## m poisson risk lag
-
-remote_admb_ed_mtp_risk_ext_comp <- update(remote_admb_ed_mtnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_mtp_risk_ext_comp)
-compare_nested(remote_admb_ed_mtp_risk_ext_comp, remote_admb_ed_mtnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-remote_admb_ed_tnb_binlag <- update(remote_admb_ed_tnb_null,add_remote_binlag)
-
-countsummary(remote_admb_ed_tnb_binlag)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_binlag)
-
-compare_alphas(remote_admb_ed_tnb_lag, remote_admb_ed_tnb_binlag)
-
-## Compare to poisson
-
-remote_admb_ed_tp_binlag <- update(remote_admb_ed_tnb_binlag,
-                           family = "truncpoiss")
-
-countsummary(remote_admb_ed_tp_binlag)
-
-compare_nested(remote_admb_ed_tp_binlag, remote_admb_ed_tnb_binlag)
-
-### Compare to multilevel
-
-remote_admb_ed_mtnb_binlag <- update(remote_admb_ed_tnb_binlag, add_nom)
-
-countsummary(remote_admb_ed_mtnb_binlag)
-
-compare_nested(remote_admb_ed_tnb_binlag, remote_admb_ed_mtnb_binlag)
-
-compare_alphas(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_binlag)
-AICtab(remote_admb_ed_mtnb_lag, remote_admb_ed_mtnb_binlag)
-
-### compare to multilevel poisson
-
-remote_admb_ed_mtp_binlag <- update(remote_admb_ed_tp_binlag, add_nom)
-
-countsummary(remote_admb_ed_mtp_binlag)
-
-compare_nested(remote_admb_ed_mtp_binlag, remote_admb_ed_mtnb_binlag)
-
-compare_nested(remote_admb_ed_tp_binlag, remote_admb_ed_mtp_binlag)
-
-
-### Add risk heterogeneity
-
-remote_admb_ed_tnb_risk <- update(remote_admb_ed_tnb_null, add_risk)
-
-countsummary(remote_admb_ed_tnb_risk)
-
-compare_alphas(remote_admb_ed_tnb_null, remote_admb_ed_tnb_risk)
-
-# compare to poisson
-
-remote_admb_ed_tp_risk <- update(remote_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(remote_admb_ed_tp_risk, remote_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-remote_admb_ed_tnb_risk_binlag <- update(remote_admb_ed_tnb_risk,add_remote_binlag)
-
-countsummary(remote_admb_ed_tnb_risk_binlag)
-
-compare_alphas(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_binlag)
-AICtab(remote_admb_ed_tnb_risk_lag, remote_admb_ed_tnb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_binlag)
-compare_alphas(remote_admb_ed_tnb_risk, remote_admb_ed_tnb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_tnb_binlag, remote_admb_ed_tnb_risk_binlag)
-compare_alphas(remote_admb_ed_tnb_binlag, remote_admb_ed_tnb_risk_binlag)
-
-## poisson risk lag
-
-remote_admb_ed_tp_risk_binlag <- update(remote_admb_ed_tnb_risk_binlag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_tp_risk_binlag)
-compare_nested(remote_admb_ed_tp_risk_binlag, remote_admb_ed_tnb_risk_binlag)
-
-### Add multilevel
-
-remote_admb_ed_mtnb_risk <- update(remote_admb_ed_tnb_risk, add_nom)
-
-countsummary(remote_admb_ed_mtnb_risk)
-
-compare_nested(remote_admb_ed_tnb_risk, remote_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-remote_admb_ed_mtp_risk <- update(remote_admb_ed_tp_risk, add_nom)
-
-countsummary(remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_mtnb_risk, remote_admb_ed_mtp_risk)
-
-compare_nested(remote_admb_ed_tp_risk, remote_admb_ed_mtp_risk)
-
-## add lag
-
-remote_admb_ed_mtnb_risk_binlag <- update(remote_admb_ed_mtnb_risk,add_remote_binlag)
-
-countsummary(remote_admb_ed_mtnb_risk_binlag)
-
-compare_nested(remote_admb_ed_tnb_risk_binlag, remote_admb_ed_mtnb_risk_binlag)
-
-compare_alphas(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_binlag)
-AICtab(remote_admb_ed_mtnb_risk_lag, remote_admb_ed_mtnb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_binlag)
-compare_alphas(remote_admb_ed_mtnb_risk, remote_admb_ed_mtnb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(remote_admb_ed_mtnb_binlag, remote_admb_ed_mtnb_risk_binlag)
-compare_alphas(remote_admb_ed_mtnb_binlag, remote_admb_ed_mtnb_risk_binlag)
-
-## m poisson risk lag
-
-remote_admb_ed_mtp_risk_binlag <- update(remote_admb_ed_mtnb_risk_binlag,
-                                family ="truncpoiss")
-
-countsummary(remote_admb_ed_mtp_risk_binlag)
-compare_nested(remote_admb_ed_mtp_risk_binlag, remote_admb_ed_mtnb_risk_binlag)
-
-
-```
+Next, in person.
 
 #### In person
 
