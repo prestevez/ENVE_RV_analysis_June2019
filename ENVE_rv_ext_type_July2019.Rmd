@@ -85,7 +85,6 @@ Next we load the packages that will be used in the analysis. The installation of
 library(victim)
 library(tidyverse)
 library(downloader)
-library(sandwich)
 library(lmtest)
 library(magrittr)
 library(glmmTMB)
@@ -93,7 +92,6 @@ library(lazyeval)
 library(glmmADMB)
 step <- stats::step
 library(arsenal)
-library(texreg)
 library(bbmle)
 library(gridExtra)
 
