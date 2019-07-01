@@ -104,6 +104,8 @@ select <- dplyr::select
 Anova <- car::Anova
 ks.test <- dgof::ks.test
 
+
+
 sessionInfo()
 
 # Create csv dir for model results
@@ -134,6 +136,16 @@ mylog <- function(x, center = FALSE){
 
 }
 
+myvif <- function(form, data, family = "binomial"){
+    if(!is_formula(form)) {form <- formula(form)}
+
+    lmmod <- glm(form, data = data,  family = family)
+
+    vifs <- car::vif(lmmod)
+
+    return(vifs)
+}
+
 mkbin <- function(x,n = 0) ifelse(x > n, 1, 0)
 
 capadjust <- function(x, y, K = 0) x/(K-y)
@@ -159,6 +171,7 @@ countsummary <- function(model){
     cat("\n")
     print(car::Anova(model))
     print(lrtest(model))
+    print(myvif(model))
 }
 
 compare_nested <- function(...) {
@@ -1537,7 +1550,7 @@ rmt_tnb <- update(rmt_tp, family = "truncnbinom")
 
 countsummary(rmt_tnb)
 
-compare_nested(rmt_tp, rmt_nb)
+compare_nested(rmt_tp, rmt_tnb)
 
 ## Multilevel
 
@@ -1883,7 +1896,7 @@ inp_tnb <- update(inp_tp, family = "truncnbinom")
 
 countsummary(inp_tnb)
 
-compare_nested(inp_tp, inp_nb)
+compare_nested(inp_tp, inp_tnb)
 
 ## Multilevel
 
