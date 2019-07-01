@@ -3946,888 +3946,202 @@ Next, in person.
 
 Repeat for in-person
 
-
-```{r inperson-event-dependence-formulas}
-
-# LHS extincs formula
-
-inperson_null_f <- inperson ~ 1
-
-# Write RHS formulas for easier coding
-
-# Add event dependence formulas
-
-add_inperson_lag <- . ~ . + lag_inperson
-
-add_inperson_adj_lag <- . ~ . + lag_inp_adj
-
-add_inperson_binlag <- . ~ . + mkbin(lag_inperson)
-
-### Compliance
-
-add_inperson_comp <- ~ + lag_inp_comp_cat
-
-```
-
-
-```{r inperson-event-dependence-incidence}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-inperson_ed_nb_null <- glmmTMB(inperson_null_f,
-                             data = enve_lag_nm_sem1,
-                             family = "nbinom2")
-
-summary(inperson_ed_nb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-inperson_ed_nb_lag <- update(inperson_ed_nb_null, add_inperson_lag)
-
-countsummary(inperson_ed_nb_lag)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_lag)
-
-## Compare to poisson
-
-inperson_ed_p_lag <- update(inperson_ed_nb_lag,
-                           family = "poisson")
-
-countsummary(inperson_ed_p_lag)
-
-compare_nested(inperson_ed_p_lag, inperson_ed_nb_lag)
-
-### Compare to multilevel
-
-inperson_ed_mnb_lag <- update(inperson_ed_nb_lag, add_cve)
-
-countsummary(inperson_ed_mnb_lag)
-
-compare_nested(inperson_ed_nb_lag, inperson_ed_mnb_lag)
-
-### compare to multilevel poisson
-
-inperson_ed_mp_lag <- update(inperson_ed_p_lag, add_cve)
-
-countsummary(inperson_ed_mp_lag)
-
-compare_nested(inperson_ed_mp_lag, inperson_ed_mnb_lag)
-
-compare_nested(inperson_ed_p_lag, inperson_ed_mp_lag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_nb_risk <- update(inperson_ed_nb_null, add_risk)
-
-countsummary(inperson_ed_nb_risk)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_nb_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_nb_risk)
-
-### Add lag and compare
-
-inperson_ed_nb_risk_lag <- update(inperson_ed_nb_risk, add_inperson_lag)
-
-countsummary(inperson_ed_nb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_nb_risk, inperson_ed_nb_risk_lag)
-compare_alphas(inperson_ed_nb_risk, inperson_ed_nb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_nb_lag, inperson_ed_nb_risk_lag)
-compare_alphas(inperson_ed_nb_lag, inperson_ed_nb_risk_lag)
-
-## poisson risk lag
-
-inperson_ed_p_risk_lag <- update(inperson_ed_nb_risk_lag,
-                                family ="poisson")
-
-countsummary(inperson_ed_p_risk_lag)
-compare_nested(inperson_ed_p_risk_lag, inperson_ed_nb_risk_lag)
-
-### Add multilevel
-
-inperson_ed_mnb_risk <- update(inperson_ed_nb_risk, add_cve)
-
-countsummary(inperson_ed_mnb_risk)
-
-compare_nested(inperson_ed_nb_risk, inperson_ed_mnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mp_risk <- update(inperson_ed_p_risk, add_cve)
-
-countsummary(inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_mnb_risk, inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_p_risk, inperson_ed_mp_risk)
-
-## add lag
-
-inperson_ed_mnb_risk_lag <- update(inperson_ed_mnb_risk, add_inperson_lag)
-
-countsummary(inperson_ed_mnb_risk_lag)
-
-compare_nested(inperson_ed_nb_risk_lag, inperson_ed_mnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mnb_risk, inperson_ed_mnb_risk_lag)
-compare_alphas(inperson_ed_mnb_risk, inperson_ed_mnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mnb_lag, inperson_ed_mnb_risk_lag)
-compare_alphas(inperson_ed_mnb_lag, inperson_ed_mnb_risk_lag)
-
-## m poisson risk lag
-
-inperson_ed_mp_risk_lag <- update(inperson_ed_mnb_risk_lag,
-                                family ="poisson")
-
-countsummary(inperson_ed_mp_risk_lag)
-compare_nested(inperson_ed_mp_risk_lag, inperson_ed_mnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-inperson_ed_nb_adj_lag <- update(inperson_ed_nb_null, add_inperson_adj_lag)
-
-countsummary(inperson_ed_nb_adj_lag)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_adj_lag)
-
-compare_alphas(inperson_ed_nb_lag, inperson_ed_nb_adj_lag)
-
-## Compare to poisson
-
-inperson_ed_p_adj_lag <- update(inperson_ed_nb_adj_lag,
-                           family = "poisson")
-
-countsummary(inperson_ed_p_adj_lag)
-
-compare_nested(inperson_ed_p_adj_lag, inperson_ed_nb_adj_lag)
-
-### Compare to multilevel
-
-inperson_ed_mnb_adj_lag <- update(inperson_ed_nb_adj_lag, add_cve)
-
-countsummary(inperson_ed_mnb_adj_lag)
-
-compare_nested(inperson_ed_nb_adj_lag, inperson_ed_mnb_adj_lag)
-
-compare_alphas(inperson_ed_mnb_lag, inperson_ed_mnb_adj_lag)
-AICtab(inperson_ed_mnb_lag, inperson_ed_mnb_adj_lag)
-
-### compare to multilevel poisson
-
-inperson_ed_mp_adj_lag <- update(inperson_ed_p_adj_lag, add_cve)
-
-countsummary(inperson_ed_mp_adj_lag)
-
-compare_nested(inperson_ed_mp_adj_lag, inperson_ed_mnb_adj_lag)
-
-compare_nested(inperson_ed_p_adj_lag, inperson_ed_mp_adj_lag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_nb_risk <- update(inperson_ed_nb_null, add_risk)
-
-countsummary(inperson_ed_nb_risk)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_nb_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_nb_risk)
-
-### Add lag and compare
-
-inperson_ed_nb_risk_adj_lag <- update(inperson_ed_nb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_ed_nb_risk_adj_lag)
-
-compare_alphas(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_adj_lag)
-AICtab(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_nb_risk, inperson_ed_nb_risk_adj_lag)
-compare_alphas(inperson_ed_nb_risk, inperson_ed_nb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_nb_adj_lag, inperson_ed_nb_risk_adj_lag)
-compare_alphas(inperson_ed_nb_adj_lag, inperson_ed_nb_risk_adj_lag)
-
-## poisson risk lag
-
-inperson_ed_p_risk_adj_lag <- update(inperson_ed_nb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(inperson_ed_p_risk_adj_lag)
-compare_nested(inperson_ed_p_risk_adj_lag, inperson_ed_nb_risk_adj_lag)
-
-### Add multilevel
-
-inperson_ed_mnb_risk <- update(inperson_ed_nb_risk, add_cve)
-
-countsummary(inperson_ed_mnb_risk)
-
-compare_nested(inperson_ed_nb_risk, inperson_ed_mnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mp_risk <- update(inperson_ed_p_risk, add_cve)
-
-countsummary(inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_mnb_risk, inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_p_risk, inperson_ed_mp_risk)
-
-## add lag
-
-inperson_ed_mnb_risk_adj_lag <- update(inperson_ed_mnb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_ed_mnb_risk_adj_lag)
-
-compare_nested(inperson_ed_nb_risk_adj_lag, inperson_ed_mnb_risk_adj_lag)
-
-compare_alphas(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_adj_lag)
-AICtab(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mnb_risk, inperson_ed_mnb_risk_adj_lag)
-compare_alphas(inperson_ed_mnb_risk, inperson_ed_mnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mnb_adj_lag, inperson_ed_mnb_risk_adj_lag)
-compare_alphas(inperson_ed_mnb_adj_lag, inperson_ed_mnb_risk_adj_lag)
-
-## m poisson risk lag
-
-inperson_ed_mp_risk_adj_lag <- update(inperson_ed_mnb_risk_adj_lag,
-                                family ="poisson")
-
-countsummary(inperson_ed_mp_risk_adj_lag)
-compare_nested(inperson_ed_mp_risk_adj_lag, inperson_ed_mnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-inperson_ed_nb_ext_comp <- update(inperson_ed_nb_null, add_inperson_comp)
-
-countsummary(inperson_ed_nb_ext_comp)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_ext_comp)
-
-compare_alphas(inperson_ed_nb_lag, inperson_ed_nb_ext_comp)
-
-## Compare to poisson
-
-inperson_ed_p_ext_comp <- update(inperson_ed_nb_ext_comp,
-                           family = "poisson")
-
-countsummary(inperson_ed_p_ext_comp)
-
-compare_nested(inperson_ed_p_ext_comp, inperson_ed_nb_ext_comp)
-
-### Compare to multilevel
-
-inperson_ed_mnb_ext_comp <- update(inperson_ed_nb_ext_comp, add_cve)
-
-countsummary(inperson_ed_mnb_ext_comp)
-
-compare_nested(inperson_ed_nb_ext_comp, inperson_ed_mnb_ext_comp)
-
-compare_alphas(inperson_ed_mnb_lag, inperson_ed_mnb_ext_comp)
-AICtab(inperson_ed_mnb_lag, inperson_ed_mnb_ext_comp)
-
-### compare to multilevel poisson
-
-inperson_ed_mp_ext_comp <- update(inperson_ed_p_ext_comp, add_cve)
-
-countsummary(inperson_ed_mp_ext_comp)
-
-compare_nested(inperson_ed_mp_ext_comp, inperson_ed_mnb_ext_comp)
-
-compare_nested(inperson_ed_p_ext_comp, inperson_ed_mp_ext_comp)
-
-
-### Add risk heterogeneity
-
-inperson_ed_nb_risk <- update(inperson_ed_nb_null, add_risk)
-
-countsummary(inperson_ed_nb_risk)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_nb_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_nb_risk)
-
-### Add lag and compare
-
-inperson_ed_nb_risk_ext_comp <- update(inperson_ed_nb_risk, add_inperson_comp)
-
-countsummary(inperson_ed_nb_risk_ext_comp)
-
-compare_alphas(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_ext_comp)
-AICtab(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_nb_risk, inperson_ed_nb_risk_ext_comp)
-compare_alphas(inperson_ed_nb_risk, inperson_ed_nb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_nb_ext_comp, inperson_ed_nb_risk_ext_comp)
-compare_alphas(inperson_ed_nb_ext_comp, inperson_ed_nb_risk_ext_comp)
-
-## poisson risk lag
-
-inperson_ed_p_risk_ext_comp <- update(inperson_ed_nb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(inperson_ed_p_risk_ext_comp)
-compare_nested(inperson_ed_p_risk_ext_comp, inperson_ed_nb_risk_ext_comp)
-
-### Add multilevel
-
-inperson_ed_mnb_risk <- update(inperson_ed_nb_risk, add_cve)
-
-countsummary(inperson_ed_mnb_risk)
-
-compare_nested(inperson_ed_nb_risk, inperson_ed_mnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mp_risk <- update(inperson_ed_p_risk, add_cve)
-
-countsummary(inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_mnb_risk, inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_p_risk, inperson_ed_mp_risk)
-
-## add lag
-
-inperson_ed_mnb_risk_ext_comp <- update(inperson_ed_mnb_risk, add_inperson_comp)
-
-countsummary(inperson_ed_mnb_risk_ext_comp)
-
-compare_nested(inperson_ed_nb_risk_ext_comp, inperson_ed_mnb_risk_ext_comp)
-
-compare_alphas(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_ext_comp)
-AICtab(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mnb_risk, inperson_ed_mnb_risk_ext_comp)
-compare_alphas(inperson_ed_mnb_risk, inperson_ed_mnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mnb_ext_comp, inperson_ed_mnb_risk_ext_comp)
-compare_alphas(inperson_ed_mnb_ext_comp, inperson_ed_mnb_risk_ext_comp)
-
-## m poisson risk lag
-
-inperson_ed_mp_risk_ext_comp <- update(inperson_ed_mnb_risk_ext_comp,
-                                family ="poisson")
-
-countsummary(inperson_ed_mp_risk_ext_comp)
-compare_nested(inperson_ed_mp_risk_ext_comp, inperson_ed_mnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-inperson_ed_nb_binlag <- update(inperson_ed_nb_null, add_inperson_binlag)
-
-countsummary(inperson_ed_nb_binlag)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_binlag)
-
-compare_alphas(inperson_ed_nb_lag, inperson_ed_nb_binlag)
-
-## Compare to poisson
-
-inperson_ed_p_binlag <- update(inperson_ed_nb_binlag,
-                           family = "poisson")
-
-countsummary(inperson_ed_p_binlag)
-
-compare_nested(inperson_ed_p_binlag, inperson_ed_nb_binlag)
-
-### Compare to multilevel
-
-inperson_ed_mnb_binlag <- update(inperson_ed_nb_binlag, add_cve)
-
-countsummary(inperson_ed_mnb_binlag)
-
-compare_nested(inperson_ed_nb_binlag, inperson_ed_mnb_binlag)
-
-compare_alphas(inperson_ed_mnb_lag, inperson_ed_mnb_binlag)
-AICtab(inperson_ed_mnb_lag, inperson_ed_mnb_binlag)
-
-### compare to multilevel poisson
-
-inperson_ed_mp_binlag <- update(inperson_ed_p_binlag, add_cve)
-
-countsummary(inperson_ed_mp_binlag)
-
-compare_nested(inperson_ed_mp_binlag, inperson_ed_mnb_binlag)
-
-compare_nested(inperson_ed_p_binlag, inperson_ed_mp_binlag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_nb_risk <- update(inperson_ed_nb_null, add_risk)
-
-countsummary(inperson_ed_nb_risk)
-
-compare_alphas(inperson_ed_nb_null, inperson_ed_nb_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_nb_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_nb_risk)
-
-### Add lag and compare
-
-inperson_ed_nb_risk_binlag <- update(inperson_ed_nb_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_nb_risk_binlag)
-
-compare_alphas(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_binlag)
-AICtab(inperson_ed_nb_risk_lag, inperson_ed_nb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_nb_risk, inperson_ed_nb_risk_binlag)
-compare_alphas(inperson_ed_nb_risk, inperson_ed_nb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_nb_binlag, inperson_ed_nb_risk_binlag)
-compare_alphas(inperson_ed_nb_binlag, inperson_ed_nb_risk_binlag)
-
-## poisson risk lag
-
-inperson_ed_p_risk_binlag <- update(inperson_ed_nb_risk_binlag,
-                                family ="poisson")
-
-countsummary(inperson_ed_p_risk_binlag)
-compare_nested(inperson_ed_p_risk_binlag, inperson_ed_nb_risk_binlag)
-
-### Add multilevel
-
-inperson_ed_mnb_risk <- update(inperson_ed_nb_risk, add_cve)
-
-countsummary(inperson_ed_mnb_risk)
-
-compare_nested(inperson_ed_nb_risk, inperson_ed_mnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mp_risk <- update(inperson_ed_p_risk, add_cve)
-
-countsummary(inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_mnb_risk, inperson_ed_mp_risk)
-
-compare_nested(inperson_ed_p_risk, inperson_ed_mp_risk)
-
-## add lag
-
-inperson_ed_mnb_risk_binlag <- update(inperson_ed_mnb_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_mnb_risk_binlag)
-
-compare_nested(inperson_ed_nb_risk_binlag, inperson_ed_mnb_risk_binlag)
-
-compare_alphas(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_binlag)
-AICtab(inperson_ed_mnb_risk_lag, inperson_ed_mnb_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mnb_risk, inperson_ed_mnb_risk_binlag)
-compare_alphas(inperson_ed_mnb_risk, inperson_ed_mnb_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mnb_binlag, inperson_ed_mnb_risk_binlag)
-compare_alphas(inperson_ed_mnb_binlag, inperson_ed_mnb_risk_binlag)
-
-## m poisson risk lag
-
-inperson_ed_mp_risk_binlag <- update(inperson_ed_mnb_risk_binlag,
-                                family ="poisson")
-
-countsummary(inperson_ed_mp_risk_binlag)
-compare_nested(inperson_ed_mp_risk_binlag, inperson_ed_mnb_risk_binlag)
-
-
-
-
-```
-
-Now estimate the effect of event dependence on prevalence.
+Prevalence models
 
 ```{r inperson-event-dependence-prevalence}
 
 
-## Use enve_lag_nm_sem1
+## Use enve_lag_nm_sem1_nona
 
-#### First test event dependence versus a null model
+# Bivariate model of event dependence
 
-inperson_ed_logit_null <- update(inperson_ed_nb_null, mkbin(inperson) ~ .,
-                                family = "binomial")
+ed_inp_logit <- glmmTMB(mkbin(inperson) ~ lag_inperson,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
-summary(inperson_ed_logit_null)
+countsummary(ed_inp_logit)
 
-### Test event dependence term (then repeat for adjusted and compliance cats)
+# Test multilevel
 
-inperson_ed_logit_lag <- update(inperson_ed_logit_null, add_inperson_lag)
+ed_inp_mlogit <- update(ed_inp_logit, add_nom)
 
-countsummary(inperson_ed_logit_lag)
+countsummary(ed_inp_mlogit)
 
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_lag)
+compare_nested(ed_inp_logit, ed_inp_mlogit)
 
+## null models
 
-### Compare to multilevel
+ed_inp_mlogit_null <- update(ed_inp_mlogit, . ~ . - lag_inperson)
 
-inperson_ed_mlogit_lag <- update(inperson_ed_logit_lag, add_cve)
+summary(ed_inp_mlogit_null)
 
-countsummary(inperson_ed_mlogit_lag)
+### Risk heterogeneity
 
-compare_nested(inperson_ed_logit_lag, inperson_ed_mlogit_lag)
+inp_preval_risk_f <- update(formula(inp_mlogit_pars_95),
+                mkbin(inperson) ~ .)
 
+ed_inp_mlogit_risk <- update(ed_inp_mlogit, inp_preval_risk_f)
 
-### Add risk heterogeneity
+countsummary(ed_inp_mlogit_risk)
 
-inperson_ed_logit_risk <- update(inperson_ed_logit_null, add_risk)
+## test polybribes?
 
-countsummary(inperson_ed_logit_risk)
+ed_inp_mlogit_risk_b <- update(ed_inp_mlogit_risk,
+                . ~ bribes + . - poly(bribes, 2, raw = TRUE))
 
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_risk)
 
-### Add lag and compare
+countsummary(ed_inp_mlogit_risk_b)
 
-inperson_ed_logit_risk_lag <- update(inperson_ed_logit_risk, add_inperson_lag)
+compare_nested(ed_inp_mlogit_risk_b, ed_inp_mlogit_risk)
 
-countsummary(inperson_ed_logit_risk_lag)
+best_model <- function(m1, m2){
+    aic_m1 <- AIC(m1)
+    aic_m2 <- AIC(m2)
 
-### Compare adding lag to risk
+    m1_better <- aic_m1 < aic_m2
 
-lrtest(inperson_ed_logit_risk, inperson_ed_logit_risk_lag)
-compare_alphas(inperson_ed_logit_risk, inperson_ed_logit_risk_lag)
+    if(m1_better){
+        best_model <- m1
+        mod_name <- deparse(substitute(m1))
+    } else{
+        best_model <- m2
+        mod_name <- deparse(substitute(m2))
+    }
+    message(paste0("\n", mod_name, " is better.\n"))
+    return(best_model)
+}
 
-## Compare adding risk to lag
+ed_inp_mlogit_best_risk <- best_model(ed_inp_mlogit_risk, ed_inp_mlogit_risk_b)
 
-lrtest(inperson_ed_logit_lag, inperson_ed_logit_risk_lag)
-compare_alphas(inperson_ed_logit_lag, inperson_ed_logit_risk_lag)
+#### add lag to risk
 
+ed_inp_mlogit_risk_lag <- update(ed_inp_mlogit_best_risk,
+            . ~ lag_inperson + .)
 
-### Add multilevel
+countsummary(ed_inp_mlogit_risk_lag)
 
-inperson_ed_mlogit_risk <- update(inperson_ed_logit_risk, add_cve)
 
-countsummary(inperson_ed_mlogit_risk)
+### Test multilevel
 
-compare_nested(inperson_ed_logit_risk, inperson_ed_mlogit_risk)
+ed_inp_logit_risk_lag <- update(ed_inp_mlogit_risk_lag,
+            . ~ . - (1|NOM_ENT))
 
+countsummary(ed_inp_logit_risk_lag)
 
-## add lag
+compare_nested(ed_inp_logit_risk_lag, ed_inp_mlogit_risk_lag)
 
-inperson_ed_mlogit_risk_lag <- update(inperson_ed_mlogit_risk, add_inperson_lag)
+#### Risk to lag
 
-countsummary(inperson_ed_mlogit_risk_lag)
+compare_nested(ed_inp_mlogit_best_risk, ed_inp_mlogit_risk_lag)
 
-compare_nested(inperson_ed_logit_risk_lag, inperson_ed_mlogit_risk_lag)
+#### Lag to risk
 
-### Compare adding lag to risk
+compare_nested(ed_inp_mlogit, ed_inp_mlogit_risk_lag)
 
-lrtest(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_lag)
-compare_alphas(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_lag)
+coef_csv(ed_inp_mlogit)
+coef_csv(ed_inp_mlogit_best_risk)
+coef_csv(ed_inp_mlogit_risk_lag)
 
-## Compare adding risk to lag
+## Then lag_rmt_adj
 
-lrtest(inperson_ed_mlogit_lag, inperson_ed_mlogit_risk_lag)
-compare_alphas(inperson_ed_mlogit_lag, inperson_ed_mlogit_risk_lag)
+# Bivariate model of event dependence
 
+ed_inp_logit_adj <- glmmTMB(mkbin(inperson) ~ lag_inp_adj,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
-####### Test event dependence term using adjusted rate #######
+countsummary(ed_inp_logit_adj)
 
-inperson_ed_logit_adj_lag <- update(inperson_ed_logit_null, add_inperson_adj_lag)
+# Test multilevel
 
-countsummary(inperson_ed_logit_adj_lag)
+ed_inp_mlogit_adj <- update(ed_inp_logit_adj, add_nom)
 
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_adj_lag)
+countsummary(ed_inp_mlogit_adj)
 
-compare_alphas(inperson_ed_logit_lag, inperson_ed_logit_adj_lag)
+compare_nested(ed_inp_logit_adj, ed_inp_mlogit_adj)
 
+AICtab(ed_inp_mlogit_adj, ed_inp_mlogit)
 
-### Compare to multilevel
+#### add adj lag
 
-inperson_ed_mlogit_adj_lag <- update(inperson_ed_logit_adj_lag, add_cve)
+ed_inp_mlogit_risk_lag_adj <- update(ed_inp_mlogit_best_risk,
+            . ~ lag_inp_adj + .)
 
-countsummary(inperson_ed_mlogit_adj_lag)
+countsummary(ed_inp_mlogit_risk_lag_adj)
 
-compare_nested(inperson_ed_logit_adj_lag, inperson_ed_mlogit_adj_lag)
 
-compare_alphas(inperson_ed_mlogit_lag, inperson_ed_mlogit_adj_lag)
-AICtab(inperson_ed_mlogit_lag, inperson_ed_mlogit_adj_lag)
+### Test multilevel
 
+ed_inp_logit_risk_lag_adj <- update(ed_inp_mlogit_risk_lag_adj,
+            . ~ . - (1|NOM_ENT))
 
-### Add risk heterogeneity
+countsummary(ed_inp_logit_risk_lag_adj)
 
-inperson_ed_logit_risk <- update(inperson_ed_logit_null, add_risk)
+compare_nested(ed_inp_logit_risk_lag_adj, ed_inp_mlogit_risk_lag_adj)
 
-countsummary(inperson_ed_logit_risk)
+#### Risk to lag
 
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_risk)
+compare_nested(ed_inp_mlogit_risk, ed_inp_mlogit_risk_lag_adj)
 
+#### Lag to risk
 
-### Add lag and compare
+compare_nested(ed_inp_mlogit_adj, ed_inp_mlogit_risk_lag_adj)
 
-inperson_ed_logit_risk_adj_lag <- update(inperson_ed_logit_risk, add_inperson_adj_lag)
+coef_csv(ed_inp_mlogit_adj)
+coef_csv(ed_inp_mlogit_risk_lag_adj)
 
-countsummary(inperson_ed_logit_risk_adj_lag)
+## then lag_inp_comp_cat
 
-compare_alphas(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_adj_lag)
-AICtab(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_adj_lag)
+# Bivariate model of event dependence
 
-### Compare adding lag to risk
+ed_inp_logit_comp <- glmmTMB(mkbin(remote) ~ lag_inp_comp_cat,
+                        data = enve_lag_nm_sem1_nona,
+                        family = "binomial")
 
-lrtest(inperson_ed_logit_risk, inperson_ed_logit_risk_adj_lag)
-compare_alphas(inperson_ed_logit_risk, inperson_ed_logit_risk_adj_lag)
+countsummary(ed_inp_logit_comp)
 
-## Compare adding risk to lag
+# Test multilevel
 
-lrtest(inperson_ed_logit_adj_lag, inperson_ed_logit_risk_adj_lag)
-compare_alphas(inperson_ed_logit_adj_lag, inperson_ed_logit_risk_adj_lag)
+ed_inp_mlogit_comp <- update(ed_inp_logit_comp, add_nom)
 
-### Add multilevel
+countsummary(ed_inp_mlogit_comp)
 
-inperson_ed_mlogit_risk <- update(inperson_ed_logit_risk, add_cve)
+compare_nested(ed_inp_logit_comp, ed_inp_mlogit_comp)
 
-countsummary(inperson_ed_mlogit_risk)
+AICtab(ed_inp_mlogit_comp, ed_inp_mlogit_adj, ed_inp_mlogit)
 
-compare_nested(inperson_ed_logit_risk, inperson_ed_mlogit_risk)
+#### add comp lag to risk
 
-## add lag
+ed_inp_mlogit_risk_lag_comp <- update(ed_inp_mlogit_best_risk,
+            . ~ lag_inp_comp_cat + .)
 
-inperson_ed_mlogit_risk_adj_lag <- update(inperson_ed_mlogit_risk, add_inperson_adj_lag)
+countsummary(ed_inp_mlogit_risk_lag_comp)
 
-countsummary(inperson_ed_mlogit_risk_adj_lag)
 
-compare_nested(inperson_ed_logit_risk_adj_lag, inperson_ed_mlogit_risk_adj_lag)
+### Test multilevel
 
-compare_alphas(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_adj_lag)
-AICtab(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_adj_lag)
+ed_inp_logit_risk_lag_comp <- update(ed_inp_mlogit_risk_lag_comp,
+            . ~ . - (1|NOM_ENT))
 
-### Compare adding lag to risk
+countsummary(ed_inp_logit_risk_lag_comp)
 
-lrtest(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_adj_lag)
-compare_alphas(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_adj_lag)
+compare_nested(ed_inp_logit_risk_lag_comp,
+                ed_inp_mlogit_risk_lag_comp)
 
-## Compare adding risk to lag
+#### Risk to lag
 
-lrtest(inperson_ed_mlogit_adj_lag, inperson_ed_mlogit_risk_adj_lag)
-compare_alphas(inperson_ed_mlogit_adj_lag, inperson_ed_mlogit_risk_adj_lag)
+compare_nested(ed_inp_mlogit_risk, ed_inp_mlogit_risk_lag_comp)
 
-####### Test event dependence term using compliance cats #######
+#### Lag to risk
 
-inperson_ed_logit_ext_comp <- update(inperson_ed_logit_null, add_inperson_comp)
+compare_nested(ed_inp_mlogit_comp, ed_inp_mlogit_risk_lag_comp)
 
-countsummary(inperson_ed_logit_ext_comp)
-
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_ext_comp)
-
-compare_alphas(inperson_ed_logit_lag, inperson_ed_logit_ext_comp)
-
-### Compare to multilevel
-
-inperson_ed_mlogit_ext_comp <- update(inperson_ed_logit_ext_comp, add_cve)
-
-countsummary(inperson_ed_mlogit_ext_comp)
-
-compare_nested(inperson_ed_logit_ext_comp, inperson_ed_mlogit_ext_comp)
-
-compare_alphas(inperson_ed_mlogit_lag, inperson_ed_mlogit_ext_comp)
-AICtab(inperson_ed_mlogit_lag, inperson_ed_mlogit_ext_comp)
-
-
-### Add risk heterogeneity
-
-inperson_ed_logit_risk <- update(inperson_ed_logit_null, add_risk)
-
-countsummary(inperson_ed_logit_risk)
-
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_logit_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_logit_risk)
-
-### Add lag and compare
-
-inperson_ed_logit_risk_ext_comp <- update(inperson_ed_logit_risk, add_inperson_comp)
-
-countsummary(inperson_ed_logit_risk_ext_comp)
-
-compare_alphas(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_ext_comp)
-AICtab(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_logit_risk, inperson_ed_logit_risk_ext_comp)
-compare_alphas(inperson_ed_logit_risk, inperson_ed_logit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_logit_ext_comp, inperson_ed_logit_risk_ext_comp)
-compare_alphas(inperson_ed_logit_ext_comp, inperson_ed_logit_risk_ext_comp)
-
-### Add multilevel
-
-inperson_ed_mlogit_risk <- update(inperson_ed_logit_risk, add_cve)
-
-countsummary(inperson_ed_mlogit_risk)
-
-compare_nested(inperson_ed_logit_risk, inperson_ed_mlogit_risk)
-
-## add lag
-
-inperson_ed_mlogit_risk_ext_comp <- update(inperson_ed_mlogit_risk, add_inperson_comp)
-
-countsummary(inperson_ed_mlogit_risk_ext_comp)
-
-compare_nested(inperson_ed_logit_risk_ext_comp, inperson_ed_mlogit_risk_ext_comp)
-
-compare_alphas(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_ext_comp)
-AICtab(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_ext_comp)
-compare_alphas(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mlogit_ext_comp, inperson_ed_mlogit_risk_ext_comp)
-compare_alphas(inperson_ed_mlogit_ext_comp, inperson_ed_mlogit_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-inperson_ed_logit_binlag <- update(inperson_ed_logit_null, add_inperson_binlag)
-
-countsummary(inperson_ed_logit_binlag)
-
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_binlag)
-
-compare_alphas(inperson_ed_logit_lag, inperson_ed_logit_binlag)
-
-### Compare to multilevel
-
-inperson_ed_mlogit_binlag <- update(inperson_ed_logit_binlag, add_cve)
-
-countsummary(inperson_ed_mlogit_binlag)
-
-compare_nested(inperson_ed_logit_binlag, inperson_ed_mlogit_binlag)
-
-compare_alphas(inperson_ed_mlogit_lag, inperson_ed_mlogit_binlag)
-AICtab(inperson_ed_mlogit_lag, inperson_ed_mlogit_binlag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_logit_risk <- update(inperson_ed_logit_null, add_risk)
-
-countsummary(inperson_ed_logit_risk)
-
-compare_alphas(inperson_ed_logit_null, inperson_ed_logit_risk)
-
-# compare to poisson
-
-inperson_ed_p_risk <- update(inperson_ed_logit_risk, family = "poisson")
-
-lrtest(inperson_ed_p_risk, inperson_ed_logit_risk)
-
-### Add lag and compare
-
-inperson_ed_logit_risk_binlag <- update(inperson_ed_logit_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_logit_risk_binlag)
-
-compare_alphas(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_binlag)
-AICtab(inperson_ed_logit_risk_lag, inperson_ed_logit_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_logit_risk, inperson_ed_logit_risk_binlag)
-compare_alphas(inperson_ed_logit_risk, inperson_ed_logit_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_logit_binlag, inperson_ed_logit_risk_binlag)
-compare_alphas(inperson_ed_logit_binlag, inperson_ed_logit_risk_binlag)
-
-### Add multilevel
-
-inperson_ed_mlogit_risk <- update(inperson_ed_logit_risk, add_cve)
-
-countsummary(inperson_ed_mlogit_risk)
-
-compare_nested(inperson_ed_logit_risk, inperson_ed_mlogit_risk)
-
-## add lag
-
-inperson_ed_mlogit_risk_binlag <- update(inperson_ed_mlogit_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_mlogit_risk_binlag)
-
-compare_nested(inperson_ed_logit_risk_binlag, inperson_ed_mlogit_risk_binlag)
-
-compare_alphas(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_binlag)
-AICtab(inperson_ed_mlogit_risk_lag, inperson_ed_mlogit_risk_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_binlag)
-compare_alphas(inperson_ed_mlogit_risk, inperson_ed_mlogit_risk_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mlogit_binlag, inperson_ed_mlogit_risk_binlag)
-compare_alphas(inperson_ed_mlogit_binlag, inperson_ed_mlogit_risk_binlag)
+coef_csv(ed_inp_mlogit_comp)
+coef_csv(ed_inp_mlogit_risk_lag_comp)
 
 
 ```
+
 
 Next, estimate the effect of event dependence in the truncated count.
 
@@ -4836,1056 +4150,185 @@ Next, estimate the effect of event dependence in the truncated count.
 
 ## Use enve_lag_nm_sem1
 
-#### First test event dependence versus a null model
+ed_inp_tp <- glmmadmb(inperson ~ lag_inperson,
+     data = subset(enve_lag_nm_sem1_nona, inperson > 0),
+     family = "truncpoiss",
+     zeroInflation = FALSE,
+     admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
+     extra.args = "-ndi 60000")
 
-inperson_ed_tnb_null <- update(inperson_ed_nb_null,
-                             data = subset(enve_lag_nm_sem1, inperson > 0),
-                             family = "truncated_nbinom2")
+countsummary(ed_inp_tp)
 
-summary(inperson_ed_tnb_null)
+## Is nb significant?
 
-### Test event dependence term (then repeat for adjusted and compliance cats)
+ed_inp_tnb <- update(ed_inp_tp, family = "truncnbinom")
 
-inperson_ed_tnb_lag <- update(inperson_ed_tnb_null, add_inperson_lag)
+countsummary(ed_inp_tnb)
 
-countsummary(inperson_ed_tnb_lag)
+compare_nested(ed_inp_tp, ed_inp_tnb)
 
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_lag)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_inp_mtp <- update(ed_inp_tp, add_nom)
 
-## Compare to poisson
+countsummary(ed_inp_mtp)
 
-inperson_ed_tp_lag <- update(inperson_ed_tnb_lag,
-                           family = "truncated_poisson")
+compare_nested(ed_inp_tp, ed_inp_mtp)
 
-countsummary(inperson_ed_tp_lag)
 
-compare_nested(inperson_ed_tp_lag, inperson_ed_tnb_lag)
 
-### Compare to multilevel
+### add risk heterogeneity: previous indicate only ROL might be significant. Use the risk factors for prevalence to compare
 
-inperson_ed_mtnb_lag <- update(inperson_ed_tnb_lag, add_cve)
+# compare to risk factors for prevalence
 
-countsummary(inperson_ed_mtnb_lag)
+inp_prv_risk <- update(formula(ed_inp_mlogit_best_risk),
+                    inperson ~ . - (1|NOM_ENT))
 
-compare_nested(inperson_ed_tnb_lag, inperson_ed_mtnb_lag)
+ed_inp_tp_risk <- update(ed_inp_tp, inp_prv_risk)
 
-### compare to multilevel poisson
+countsummary(ed_inp_tp_risk)
 
-inperson_ed_mtp_lag <- update(inperson_ed_tp_lag, add_cve)
+### Add rule of law
 
-countsummary(inperson_ed_mtp_lag)
+ed_inp_tp_risk_rol <- update(ed_inp_tp_risk, . ~ . +
+                scale(Derecho, mean_Derecho, FALSE))
 
-compare_nested(inperson_ed_mtp_lag, inperson_ed_mtnb_lag)
+countsummary(ed_inp_tp_risk_rol)
 
-compare_nested(inperson_ed_tp_lag, inperson_ed_mtp_lag)
+ed_inp_tp_rol <- update(ed_inp_tp, . ~
+                scale(Derecho, mean_Derecho, FALSE))
 
+countsummary(ed_inp_tp_rol)
 
-### Add risk heterogeneity
+compare_nested(ed_inp_tp_risk, ed_inp_tp_risk_rol)
 
-inperson_ed_tnb_risk <- update(inperson_ed_tnb_null, add_risk)
+compare_nested(ed_inp_tp_rol, ed_inp_tp_risk_rol)
 
-countsummary(inperson_ed_tnb_risk)
+ed_inp_tp_best_risk <- best_model(ed_inp_tp_risk, ed_inp_tp_risk_rol)
 
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_risk)
+ed_inp_tp_best_risk <- best_model(ed_inp_tp_rol, ed_inp_tp_risk_rol)
 
-# compare to poisson
 
-inperson_ed_tp_risk <- update(inperson_ed_tnb_risk, family = "truncated_poisson")
+## adding lag to risk model
+ed_inp_tp_risk_lag <- update(ed_inp_tp_best_risk,
+                        . ~ lag_inperson + .)
 
-lrtest(inperson_ed_tp_risk, inperson_ed_tnb_risk)
+countsummary(ed_inp_tp_risk_lag)
 
-### Add lag and compare
+## significance of risk to lag
 
-inperson_ed_tnb_risk_lag <- update(inperson_ed_tnb_risk, add_inperson_lag)
+compare_nested(ed_inp_tp, ed_inp_tp_risk_lag)
 
-countsummary(inperson_ed_tnb_risk_lag)
+## significance of lag to risk
 
-### Compare adding lag to risk
+compare_nested(ed_inp_tp_best_risk, ed_inp_tp_risk_lag)
 
-lrtest(inperson_ed_tnb_risk, inperson_ed_tnb_risk_lag)
-compare_alphas(inperson_ed_tnb_risk, inperson_ed_tnb_risk_lag)
+## save as csv
 
-## Compare adding risk to lag
+coef_csv(ed_inp_tp)
+coef_csv(ed_inp_tp_risk_lag)
+coef_csv(ed_inp_tp_best_risk)
 
-lrtest(inperson_ed_tnb_lag, inperson_ed_tnb_risk_lag)
-compare_alphas(inperson_ed_tnb_lag, inperson_ed_tnb_risk_lag)
+## repeat for adjusted lag
 
-## poisson risk lag
+ed_inp_tp_adj <- glmmadmb(inperson ~ lag_inp_adj,
+     data = subset(enve_lag_nm_sem1_nona, inperson > 0),
+     family = "truncpoiss",
+     zeroInflation = FALSE,
+     admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
+     extra.args = "-ndi 60000")
 
-inperson_ed_tp_risk_lag <- update(inperson_ed_tnb_risk_lag,
-                                family ="truncated_poisson")
+countsummary(ed_inp_tp_adj)
 
-countsummary(inperson_ed_tp_risk_lag)
-compare_nested(inperson_ed_tp_risk_lag, inperson_ed_tnb_risk_lag)
+## Is nb significant?
 
-### Add multilevel
+ed_inp_tnb_adj <- update(ed_inp_tp_adj, family = "truncnbinom")
 
-inperson_ed_mtnb_risk <- update(inperson_ed_tnb_risk, add_cve)
+countsummary(ed_inp_tnb_adj)
 
-countsummary(inperson_ed_mtnb_risk)
+compare_nested(ed_inp_tp_adj, ed_inp_tnb_adj)
 
-compare_nested(inperson_ed_tnb_risk, inperson_ed_mtnb_risk)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_inp_mtp_adj <- update(ed_inp_tp_adj, add_nom)
 
-# multilevel poisson
+countsummary(ed_inp_mtp_adj)
 
-inperson_ed_mtp_risk <- update(inperson_ed_tp_risk, add_cve)
+compare_nested(ed_inp_tp_adj, ed_inp_mtp_adj)
 
-countsummary(inperson_ed_mtp_risk)
 
-compare_nested(inperson_ed_mtnb_risk, inperson_ed_mtp_risk)
+### add risk heterogeneity: previous indicate only ROL might be significant. Use the risk factors for prevalence to compare
 
-compare_nested(inperson_ed_tp_risk, inperson_ed_mtp_risk)
+## adding lag to risk model
+ed_inp_tp_risk_lag_adj <- update(ed_inp_tp_best_risk,
+                        . ~ lag_inp_adj + .)
 
-## add lag
+countsummary(ed_inp_tp_risk_lag_adj)
 
-inperson_ed_mtnb_risk_lag <- update(inperson_ed_mtnb_risk, add_inperson_lag)
+## significance of risk to lag
 
-countsummary(inperson_ed_mtnb_risk_lag)
+compare_nested(ed_inp_tp_adj, ed_inp_tp_risk_lag_adj)
 
-compare_nested(inperson_ed_tnb_risk_lag, inperson_ed_mtnb_risk_lag)
+## significance of lag to risk
 
-### Compare adding lag to risk
+compare_nested(ed_inp_tp_best_risk, ed_inp_tp_risk_lag_adj)
 
-lrtest(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_lag)
-compare_alphas(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_lag)
+## save as csv
 
-## Compare adding risk to lag
+coef_csv(ed_inp_tp_adj)
+coef_csv(ed_inp_tp_risk_lag_adj)
 
-lrtest(inperson_ed_mtnb_lag, inperson_ed_mtnb_risk_lag)
-compare_alphas(inperson_ed_mtnb_lag, inperson_ed_mtnb_risk_lag)
 
-## m poisson risk lag
+## repeat for comp lag categories
 
-inperson_ed_mtp_risk_lag <- update(inperson_ed_mtnb_risk_lag,
-                                family ="truncated_poisson")
+ed_inp_tp_comp <- glmmadmb(inperson ~ lag_inp_comp_cat,
+     data = subset(enve_lag_nm_sem1_nona, inperson > 0),
+     family = "truncpoiss",
+     zeroInflation = FALSE,
+     admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
+     extra.args = "-ndi 60000")
 
-countsummary(inperson_ed_mtp_risk_lag)
-compare_nested(inperson_ed_mtp_risk_lag, inperson_ed_mtnb_risk_lag)
+countsummary(ed_inp_tp_comp)
 
+## Is nb significant?
 
-####### Test event dependence term using adjusted rate #######
+ed_inp_tnb_comp <- update(ed_inp_tp_comp, family = "truncnbinom")
 
-inperson_ed_tnb_adj_lag <- update(inperson_ed_tnb_null, add_inperson_adj_lag)
+countsummary(ed_inp_tnb_comp)
 
-countsummary(inperson_ed_tnb_adj_lag)
+compare_nested(ed_inp_tp_comp, ed_inp_tnb_comp)
 
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_adj_lag)
+## Is multilevel significant? (previous results suggest it is not)
+# poisson
+ed_inp_mtp_comp <- update(ed_inp_tp_comp, add_nom)
 
-compare_alphas(inperson_ed_tnb_lag, inperson_ed_tnb_adj_lag)
+countsummary(ed_inp_mtp_comp)
 
-## Compare to poisson
+compare_nested(ed_inp_tp_comp, ed_inp_mtp_comp)
 
-inperson_ed_tp_adj_lag <- update(inperson_ed_tnb_adj_lag,
-                           family = "truncated_poisson")
 
-countsummary(inperson_ed_tp_adj_lag)
+### add risk heterogeneity: previous indicate only ROL might be significant. Use the risk factors for prevalence to compare
 
-compare_nested(inperson_ed_tp_adj_lag, inperson_ed_tnb_adj_lag)
+## adding lag to risk model
+ed_inp_tp_risk_lag_comp <- update(ed_inp_tp_best_risk,
+                        . ~ lag_inp_comp_cat + .)
 
-### Compare to multilevel
+countsummary(ed_inp_tp_risk_lag_comp)
 
-inperson_ed_mtnb_adj_lag <- update(inperson_ed_tnb_adj_lag, add_cve)
+## significance of risk to lag
 
-countsummary(inperson_ed_mtnb_adj_lag)
+compare_nested(ed_inp_tp_comp, ed_inp_tp_risk_lag_comp)
 
-compare_nested(inperson_ed_tnb_adj_lag, inperson_ed_mtnb_adj_lag)
+## significance of lag to risk
 
-compare_alphas(inperson_ed_mtnb_lag, inperson_ed_mtnb_adj_lag)
-AICtab(inperson_ed_mtnb_lag, inperson_ed_mtnb_adj_lag)
+compare_nested(ed_inp_tp_best_risk, ed_inp_tp_risk_lag_comp)
 
-### compare to multilevel poisson
+## save as csv
 
-inperson_ed_mtp_adj_lag <- update(inperson_ed_tp_adj_lag, add_cve)
-
-countsummary(inperson_ed_mtp_adj_lag)
-
-compare_nested(inperson_ed_mtp_adj_lag, inperson_ed_mtnb_adj_lag)
-
-compare_nested(inperson_ed_tp_adj_lag, inperson_ed_mtp_adj_lag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_tnb_risk <- update(inperson_ed_tnb_null, add_risk)
-
-countsummary(inperson_ed_tnb_risk)
-
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_ed_tp_risk <- update(inperson_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(inperson_ed_tp_risk, inperson_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_ed_tnb_risk_adj_lag <- update(inperson_ed_tnb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_ed_tnb_risk_adj_lag)
-
-compare_alphas(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_adj_lag)
-AICtab(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_tnb_risk, inperson_ed_tnb_risk_adj_lag)
-compare_alphas(inperson_ed_tnb_risk, inperson_ed_tnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_tnb_adj_lag, inperson_ed_tnb_risk_adj_lag)
-compare_alphas(inperson_ed_tnb_adj_lag, inperson_ed_tnb_risk_adj_lag)
-
-## poisson risk lag
-
-inperson_ed_tp_risk_adj_lag <- update(inperson_ed_tnb_risk_adj_lag,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_tp_risk_adj_lag)
-compare_nested(inperson_ed_tp_risk_adj_lag, inperson_ed_tnb_risk_adj_lag)
-
-### Add multilevel
-
-inperson_ed_mtnb_risk <- update(inperson_ed_tnb_risk, add_cve)
-
-countsummary(inperson_ed_mtnb_risk)
-
-compare_nested(inperson_ed_tnb_risk, inperson_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mtp_risk <- update(inperson_ed_tp_risk, add_cve)
-
-countsummary(inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_mtnb_risk, inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_tp_risk, inperson_ed_mtp_risk)
-
-## add lag
-
-inperson_ed_mtnb_risk_adj_lag <- update(inperson_ed_mtnb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_ed_mtnb_risk_adj_lag)
-
-compare_nested(inperson_ed_tnb_risk_adj_lag, inperson_ed_mtnb_risk_adj_lag)
-
-compare_alphas(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_adj_lag)
-AICtab(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_adj_lag)
-compare_alphas(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mtnb_adj_lag, inperson_ed_mtnb_risk_adj_lag)
-compare_alphas(inperson_ed_mtnb_adj_lag, inperson_ed_mtnb_risk_adj_lag)
-
-## m poisson risk lag
-
-inperson_ed_mtp_risk_adj_lag <- update(inperson_ed_mtnb_risk_adj_lag,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_mtp_risk_adj_lag)
-compare_nested(inperson_ed_mtp_risk_adj_lag, inperson_ed_mtnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-inperson_ed_tnb_ext_comp <- update(inperson_ed_tnb_null, add_inperson_comp)
-
-countsummary(inperson_ed_tnb_ext_comp)
-
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_ext_comp)
-
-compare_alphas(inperson_ed_tnb_lag, inperson_ed_tnb_ext_comp)
-
-## Compare to poisson
-
-inperson_ed_tp_ext_comp <- update(inperson_ed_tnb_ext_comp,
-                           family = "truncated_poisson")
-
-countsummary(inperson_ed_tp_ext_comp)
-
-compare_nested(inperson_ed_tp_ext_comp, inperson_ed_tnb_ext_comp)
-
-### Compare to multilevel
-
-inperson_ed_mtnb_ext_comp <- update(inperson_ed_tnb_ext_comp, add_cve)
-
-countsummary(inperson_ed_mtnb_ext_comp)
-
-compare_nested(inperson_ed_tnb_ext_comp, inperson_ed_mtnb_ext_comp)
-
-compare_alphas(inperson_ed_mtnb_lag, inperson_ed_mtnb_ext_comp)
-AICtab(inperson_ed_mtnb_lag, inperson_ed_mtnb_ext_comp)
-
-### compare to multilevel poisson
-
-inperson_ed_mtp_ext_comp <- update(inperson_ed_tp_ext_comp, add_cve)
-
-countsummary(inperson_ed_mtp_ext_comp)
-
-compare_nested(inperson_ed_mtp_ext_comp, inperson_ed_mtnb_ext_comp)
-
-compare_nested(inperson_ed_tp_ext_comp, inperson_ed_mtp_ext_comp)
-
-
-### Add risk heterogeneity
-
-inperson_ed_tnb_risk <- update(inperson_ed_tnb_null, add_risk)
-
-countsummary(inperson_ed_tnb_risk)
-
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_ed_tp_risk <- update(inperson_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(inperson_ed_tp_risk, inperson_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_ed_tnb_risk_ext_comp <- update(inperson_ed_tnb_risk, add_inperson_comp)
-
-countsummary(inperson_ed_tnb_risk_ext_comp)
-
-compare_alphas(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_ext_comp)
-AICtab(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_tnb_risk, inperson_ed_tnb_risk_ext_comp)
-compare_alphas(inperson_ed_tnb_risk, inperson_ed_tnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_tnb_ext_comp, inperson_ed_tnb_risk_ext_comp)
-compare_alphas(inperson_ed_tnb_ext_comp, inperson_ed_tnb_risk_ext_comp)
-
-## poisson risk lag
-
-inperson_ed_tp_risk_ext_comp <- update(inperson_ed_tnb_risk_ext_comp,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_tp_risk_ext_comp)
-compare_nested(inperson_ed_tp_risk_ext_comp, inperson_ed_tnb_risk_ext_comp)
-
-### Add multilevel
-
-inperson_ed_mtnb_risk <- update(inperson_ed_tnb_risk, add_cve)
-
-countsummary(inperson_ed_mtnb_risk)
-
-compare_nested(inperson_ed_tnb_risk, inperson_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mtp_risk <- update(inperson_ed_tp_risk, add_cve)
-
-countsummary(inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_mtnb_risk, inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_tp_risk, inperson_ed_mtp_risk)
-
-## add lag
-
-inperson_ed_mtnb_risk_ext_comp <- update(inperson_ed_mtnb_risk, add_inperson_comp)
-
-countsummary(inperson_ed_mtnb_risk_ext_comp)
-
-compare_nested(inperson_ed_tnb_risk_ext_comp, inperson_ed_mtnb_risk_ext_comp)
-
-compare_alphas(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_ext_comp)
-AICtab(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_ext_comp)
-compare_alphas(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mtnb_ext_comp, inperson_ed_mtnb_risk_ext_comp)
-compare_alphas(inperson_ed_mtnb_ext_comp, inperson_ed_mtnb_risk_ext_comp)
-
-## m poisson risk lag
-
-inperson_ed_mtp_risk_ext_comp <- update(inperson_ed_mtnb_risk_ext_comp,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_mtp_risk_ext_comp)
-compare_nested(inperson_ed_mtp_risk_ext_comp, inperson_ed_mtnb_risk_ext_comp)
-
-
-####### Test event dependence term using binary lag #######
-
-inperson_ed_tnb_ext_binlag <- update(inperson_ed_tnb_null, add_inperson_binlag)
-
-countsummary(inperson_ed_tnb_ext_binlag)
-
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_ext_binlag)
-
-compare_alphas(inperson_ed_tnb_lag, inperson_ed_tnb_ext_binlag)
-
-## Compare to poisson
-
-inperson_ed_tp_ext_binlag <- update(inperson_ed_tnb_ext_binlag,
-                           family = "truncated_poisson")
-
-countsummary(inperson_ed_tp_ext_binlag)
-
-compare_nested(inperson_ed_tp_ext_binlag, inperson_ed_tnb_ext_binlag)
-
-### Compare to multilevel
-
-inperson_ed_mtnb_ext_binlag <- update(inperson_ed_tnb_ext_binlag, add_cve)
-
-countsummary(inperson_ed_mtnb_ext_binlag)
-
-compare_nested(inperson_ed_tnb_ext_binlag, inperson_ed_mtnb_ext_binlag)
-
-compare_alphas(inperson_ed_mtnb_lag, inperson_ed_mtnb_ext_binlag)
-AICtab(inperson_ed_mtnb_lag, inperson_ed_mtnb_ext_binlag)
-
-### compare to multilevel poisson
-
-inperson_ed_mtp_ext_binlag <- update(inperson_ed_tp_ext_binlag, add_cve)
-
-countsummary(inperson_ed_mtp_ext_binlag)
-
-compare_nested(inperson_ed_mtp_ext_binlag, inperson_ed_mtnb_ext_binlag)
-
-compare_nested(inperson_ed_tp_ext_binlag, inperson_ed_mtp_ext_binlag)
-
-
-### Add risk heterogeneity
-
-inperson_ed_tnb_risk <- update(inperson_ed_tnb_null, add_risk)
-
-countsummary(inperson_ed_tnb_risk)
-
-compare_alphas(inperson_ed_tnb_null, inperson_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_ed_tp_risk <- update(inperson_ed_tnb_risk, family = "truncated_poisson")
-
-lrtest(inperson_ed_tp_risk, inperson_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_ed_tnb_risk_ext_binlag <- update(inperson_ed_tnb_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_tnb_risk_ext_binlag)
-
-compare_alphas(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_ext_binlag)
-AICtab(inperson_ed_tnb_risk_lag, inperson_ed_tnb_risk_ext_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_tnb_risk, inperson_ed_tnb_risk_ext_binlag)
-compare_alphas(inperson_ed_tnb_risk, inperson_ed_tnb_risk_ext_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_tnb_ext_binlag, inperson_ed_tnb_risk_ext_binlag)
-compare_alphas(inperson_ed_tnb_ext_binlag, inperson_ed_tnb_risk_ext_binlag)
-
-## poisson risk lag
-
-inperson_ed_tp_risk_ext_binlag <- update(inperson_ed_tnb_risk_ext_binlag,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_tp_risk_ext_binlag)
-compare_nested(inperson_ed_tp_risk_ext_binlag, inperson_ed_tnb_risk_ext_binlag)
-
-### Add multilevel
-
-inperson_ed_mtnb_risk <- update(inperson_ed_tnb_risk, add_cve)
-
-countsummary(inperson_ed_mtnb_risk)
-
-compare_nested(inperson_ed_tnb_risk, inperson_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_ed_mtp_risk <- update(inperson_ed_tp_risk, add_cve)
-
-countsummary(inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_mtnb_risk, inperson_ed_mtp_risk)
-
-compare_nested(inperson_ed_tp_risk, inperson_ed_mtp_risk)
-
-## add lag
-
-inperson_ed_mtnb_risk_ext_binlag <- update(inperson_ed_mtnb_risk, add_inperson_binlag)
-
-countsummary(inperson_ed_mtnb_risk_ext_binlag)
-
-compare_nested(inperson_ed_tnb_risk_ext_binlag, inperson_ed_mtnb_risk_ext_binlag)
-
-compare_alphas(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_ext_binlag)
-AICtab(inperson_ed_mtnb_risk_lag, inperson_ed_mtnb_risk_ext_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_ext_binlag)
-compare_alphas(inperson_ed_mtnb_risk, inperson_ed_mtnb_risk_ext_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_ed_mtnb_ext_binlag, inperson_ed_mtnb_risk_ext_binlag)
-compare_alphas(inperson_ed_mtnb_ext_binlag, inperson_ed_mtnb_risk_ext_binlag)
-
-## m poisson risk lag
-
-inperson_ed_mtp_risk_ext_binlag <- update(inperson_ed_mtnb_risk_ext_binlag,
-                                family ="truncated_poisson")
-
-countsummary(inperson_ed_mtp_risk_ext_binlag)
-compare_nested(inperson_ed_mtp_risk_ext_binlag, inperson_ed_mtnb_risk_ext_binlag)
-
-
-
+coef_csv(ed_inp_tp_comp)
+coef_csv(ed_inp_tp_risk_lag_comp)
 
 ```
-
-Repeat using glmmADMB
-
-
-```{r inperson-event-dependence-concentration-glmmADMB}
-
-## Use enve_lag_nm_sem1
-
-#### First test event dependence versus a null model
-
-inperson_admb_ed_tnb_null <- glmmadmb(formula(inperson_ed_tnb_null),
-                             data = subset(enve_lag_nm_sem1, inperson > 0),
-                             family = "truncnbinom",
-                             zeroInflation = FALSE,
-                             admb.opts = glmmADMB::admbControl(noinit = FALSE, shess=FALSE),
-                             extra.args = "-ndi 60000")
-
-summary(inperson_admb_ed_tnb_null)
-
-### Test event dependence term (then repeat for adjusted and compliance cats)
-
-inperson_admb_ed_tnb_lag <- update(inperson_admb_ed_tnb_null, add_inperson_lag)
-
-countsummary(inperson_admb_ed_tnb_lag)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_lag)
-
-## Compare to poisson
-
-inperson_admb_ed_tp_lag <- update(inperson_admb_ed_tnb_lag,
-                           family = "truncpoiss")
-
-countsummary(inperson_admb_ed_tp_lag)
-
-compare_nested(inperson_admb_ed_tp_lag, inperson_admb_ed_tnb_lag)
-
-### Compare to multilevel
-
-inperson_admb_ed_mtnb_lag <- update(inperson_admb_ed_tnb_lag, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_lag)
-
-compare_nested(inperson_admb_ed_tnb_lag, inperson_admb_ed_mtnb_lag)
-
-### compare to multilevel poisson
-
-inperson_admb_ed_mtp_lag <- update(inperson_admb_ed_tp_lag, add_nom)
-
-countsummary(inperson_admb_ed_mtp_lag)
-
-compare_nested(inperson_admb_ed_mtp_lag, inperson_admb_ed_mtnb_lag)
-
-compare_nested(inperson_admb_ed_tp_lag, inperson_admb_ed_mtp_lag)
-
-
-### Add risk heterogeneity
-
-inperson_admb_ed_tnb_risk <- update(inperson_admb_ed_tnb_null, add_risk)
-
-countsummary(inperson_admb_ed_tnb_risk)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_admb_ed_tp_risk <- update(inperson_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(inperson_admb_ed_tp_risk, inperson_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_admb_ed_tnb_risk_lag <- update(inperson_admb_ed_tnb_risk, add_inperson_lag)
-
-countsummary(inperson_admb_ed_tnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_lag)
-compare_alphas(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_tnb_lag, inperson_admb_ed_tnb_risk_lag)
-compare_alphas(inperson_admb_ed_tnb_lag, inperson_admb_ed_tnb_risk_lag)
-
-## poisson risk lag
-
-inperson_admb_ed_tp_risk_lag <- update(inperson_admb_ed_tnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_tp_risk_lag)
-compare_nested(inperson_admb_ed_tp_risk_lag, inperson_admb_ed_tnb_risk_lag)
-
-### Add multilevel
-
-inperson_admb_ed_mtnb_risk <- update(inperson_admb_ed_tnb_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_risk)
-
-compare_nested(inperson_admb_ed_tnb_risk, inperson_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_admb_ed_mtp_risk <- update(inperson_admb_ed_tp_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_tp_risk, inperson_admb_ed_mtp_risk)
-
-## add lag
-
-inperson_admb_ed_mtnb_risk_lag <- update(inperson_admb_ed_mtnb_risk, add_inperson_lag)
-
-countsummary(inperson_admb_ed_mtnb_risk_lag)
-
-compare_nested(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_mtnb_risk_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_lag)
-compare_alphas(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_risk_lag)
-compare_alphas(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_risk_lag)
-
-## m poisson risk lag
-
-inperson_admb_ed_mtp_risk_lag <- update(inperson_admb_ed_mtnb_risk_lag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_mtp_risk_lag)
-compare_nested(inperson_admb_ed_mtp_risk_lag, inperson_admb_ed_mtnb_risk_lag)
-
-
-####### Test event dependence term using adjusted rate #######
-
-inperson_admb_ed_tnb_adj_lag <- update(inperson_admb_ed_tnb_null, add_inperson_adj_lag)
-
-countsummary(inperson_admb_ed_tnb_adj_lag)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_adj_lag)
-
-compare_alphas(inperson_admb_ed_tnb_lag, inperson_admb_ed_tnb_adj_lag)
-
-## Compare to poisson
-
-inperson_admb_ed_tp_adj_lag <- update(inperson_admb_ed_tnb_adj_lag,
-                           family = "truncpoiss")
-
-countsummary(inperson_admb_ed_tp_adj_lag)
-
-compare_nested(inperson_admb_ed_tp_adj_lag, inperson_admb_ed_tnb_adj_lag)
-
-### Compare to multilevel
-
-inperson_admb_ed_mtnb_adj_lag <- update(inperson_admb_ed_tnb_adj_lag, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_adj_lag)
-
-compare_nested(inperson_admb_ed_tnb_adj_lag, inperson_admb_ed_mtnb_adj_lag)
-
-compare_alphas(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_adj_lag)
-AICtab(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_adj_lag)
-
-### compare to multilevel poisson
-
-inperson_admb_ed_mtp_adj_lag <- update(inperson_admb_ed_tp_adj_lag, add_nom)
-
-countsummary(inperson_admb_ed_mtp_adj_lag)
-
-compare_nested(inperson_admb_ed_mtp_adj_lag, inperson_admb_ed_mtnb_adj_lag)
-
-compare_nested(inperson_admb_ed_tp_adj_lag, inperson_admb_ed_mtp_adj_lag)
-
-
-### Add risk heterogeneity
-
-inperson_admb_ed_tnb_risk <- update(inperson_admb_ed_tnb_null, add_risk)
-
-countsummary(inperson_admb_ed_tnb_risk)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_admb_ed_tp_risk <- update(inperson_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(inperson_admb_ed_tp_risk, inperson_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_admb_ed_tnb_risk_adj_lag <- update(inperson_admb_ed_tnb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_admb_ed_tnb_risk_adj_lag)
-
-compare_alphas(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_adj_lag)
-AICtab(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_adj_lag)
-compare_alphas(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_tnb_adj_lag, inperson_admb_ed_tnb_risk_adj_lag)
-compare_alphas(inperson_admb_ed_tnb_adj_lag, inperson_admb_ed_tnb_risk_adj_lag)
-
-## poisson risk lag
-
-inperson_admb_ed_tp_risk_adj_lag <- update(inperson_admb_ed_tnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_tp_risk_adj_lag)
-compare_nested(inperson_admb_ed_tp_risk_adj_lag, inperson_admb_ed_tnb_risk_adj_lag)
-
-### Add multilevel
-
-inperson_admb_ed_mtnb_risk <- update(inperson_admb_ed_tnb_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_risk)
-
-compare_nested(inperson_admb_ed_tnb_risk, inperson_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_admb_ed_mtp_risk <- update(inperson_admb_ed_tp_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_tp_risk, inperson_admb_ed_mtp_risk)
-
-## add lag
-
-inperson_admb_ed_mtnb_risk_adj_lag <- update(inperson_admb_ed_mtnb_risk, add_inperson_adj_lag)
-
-countsummary(inperson_admb_ed_mtnb_risk_adj_lag)
-
-compare_nested(inperson_admb_ed_tnb_risk_adj_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-
-compare_alphas(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-AICtab(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_adj_lag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_mtnb_adj_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-compare_alphas(inperson_admb_ed_mtnb_adj_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-
-## m poisson risk lag
-
-inperson_admb_ed_mtp_risk_adj_lag <- update(inperson_admb_ed_mtnb_risk_adj_lag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_mtp_risk_adj_lag)
-compare_nested(inperson_admb_ed_mtp_risk_adj_lag, inperson_admb_ed_mtnb_risk_adj_lag)
-
-####### Test event dependence term using compliance cats #######
-
-inperson_admb_ed_tnb_ext_comp <- update(inperson_admb_ed_tnb_null, add_inperson_comp)
-
-countsummary(inperson_admb_ed_tnb_ext_comp)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_ext_comp)
-
-compare_alphas(inperson_admb_ed_tnb_lag, inperson_admb_ed_tnb_ext_comp)
-
-## Compare to poisson
-
-inperson_admb_ed_tp_ext_comp <- update(inperson_admb_ed_tnb_ext_comp,
-                           family = "truncpoiss")
-
-countsummary(inperson_admb_ed_tp_ext_comp)
-
-compare_nested(inperson_admb_ed_tp_ext_comp, inperson_admb_ed_tnb_ext_comp)
-
-### Compare to multilevel
-
-inperson_admb_ed_mtnb_ext_comp <- update(inperson_admb_ed_tnb_ext_comp, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_ext_comp)
-
-compare_nested(inperson_admb_ed_tnb_ext_comp, inperson_admb_ed_mtnb_ext_comp)
-
-compare_alphas(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_ext_comp)
-AICtab(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_ext_comp)
-
-### compare to multilevel poisson
-
-inperson_admb_ed_mtp_ext_comp <- update(inperson_admb_ed_tp_ext_comp, add_nom)
-
-countsummary(inperson_admb_ed_mtp_ext_comp)
-
-compare_nested(inperson_admb_ed_mtp_ext_comp, inperson_admb_ed_mtnb_ext_comp)
-
-compare_nested(inperson_admb_ed_tp_ext_comp, inperson_admb_ed_mtp_ext_comp)
-
-
-### Add risk heterogeneity
-
-inperson_admb_ed_tnb_risk <- update(inperson_admb_ed_tnb_null, add_risk)
-
-countsummary(inperson_admb_ed_tnb_risk)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_admb_ed_tp_risk <- update(inperson_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(inperson_admb_ed_tp_risk, inperson_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_admb_ed_tnb_risk_ext_comp <- update(inperson_admb_ed_tnb_risk, add_inperson_comp)
-
-countsummary(inperson_admb_ed_tnb_risk_ext_comp)
-
-compare_alphas(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_ext_comp)
-AICtab(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_ext_comp)
-compare_alphas(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_tnb_ext_comp, inperson_admb_ed_tnb_risk_ext_comp)
-compare_alphas(inperson_admb_ed_tnb_ext_comp, inperson_admb_ed_tnb_risk_ext_comp)
-
-## poisson risk lag
-
-inperson_admb_ed_tp_risk_ext_comp <- update(inperson_admb_ed_tnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_tp_risk_ext_comp)
-compare_nested(inperson_admb_ed_tp_risk_ext_comp, inperson_admb_ed_tnb_risk_ext_comp)
-
-### Add multilevel
-
-inperson_admb_ed_mtnb_risk <- update(inperson_admb_ed_tnb_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_risk)
-
-compare_nested(inperson_admb_ed_tnb_risk, inperson_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_admb_ed_mtp_risk <- update(inperson_admb_ed_tp_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_tp_risk, inperson_admb_ed_mtp_risk)
-
-## add lag
-
-inperson_admb_ed_mtnb_risk_ext_comp <- update(inperson_admb_ed_mtnb_risk, add_inperson_comp)
-
-countsummary(inperson_admb_ed_mtnb_risk_ext_comp)
-
-compare_nested(inperson_admb_ed_tnb_risk_ext_comp, inperson_admb_ed_mtnb_risk_ext_comp)
-
-compare_alphas(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_ext_comp)
-AICtab(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_ext_comp)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_ext_comp)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_mtnb_ext_comp, inperson_admb_ed_mtnb_risk_ext_comp)
-compare_alphas(inperson_admb_ed_mtnb_ext_comp, inperson_admb_ed_mtnb_risk_ext_comp)
-
-## m poisson risk lag
-
-inperson_admb_ed_mtp_risk_ext_comp <- update(inperson_admb_ed_mtnb_risk_ext_comp,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_mtp_risk_ext_comp)
-compare_nested(inperson_admb_ed_mtp_risk_ext_comp, inperson_admb_ed_mtnb_risk_ext_comp)
-
-####### Test event dependence term using binary lag #######
-
-inperson_admb_ed_tnb_ext_binlag <- update(inperson_admb_ed_tnb_null, add_inperson_binlag)
-
-countsummary(inperson_admb_ed_tnb_ext_binlag)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_ext_binlag)
-
-compare_alphas(inperson_admb_ed_tnb_lag, inperson_admb_ed_tnb_ext_binlag)
-
-## Compare to poisson
-
-inperson_admb_ed_tp_ext_binlag <- update(inperson_admb_ed_tnb_ext_binlag,
-                           family = "truncpoiss")
-
-countsummary(inperson_admb_ed_tp_ext_binlag)
-
-compare_nested(inperson_admb_ed_tp_ext_binlag, inperson_admb_ed_tnb_ext_binlag)
-
-### Compare to multilevel
-
-inperson_admb_ed_mtnb_ext_binlag <- update(inperson_admb_ed_tnb_ext_binlag, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_ext_binlag)
-
-compare_nested(inperson_admb_ed_tnb_ext_binlag, inperson_admb_ed_mtnb_ext_binlag)
-
-compare_alphas(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_ext_binlag)
-AICtab(inperson_admb_ed_mtnb_lag, inperson_admb_ed_mtnb_ext_binlag)
-
-### compare to multilevel poisson
-
-inperson_admb_ed_mtp_ext_binlag <- update(inperson_admb_ed_tp_ext_binlag, add_nom)
-
-countsummary(inperson_admb_ed_mtp_ext_binlag)
-
-compare_nested(inperson_admb_ed_mtp_ext_binlag, inperson_admb_ed_mtnb_ext_binlag)
-
-compare_nested(inperson_admb_ed_tp_ext_binlag, inperson_admb_ed_mtp_ext_binlag)
-
-
-### Add risk heterogeneity
-
-inperson_admb_ed_tnb_risk <- update(inperson_admb_ed_tnb_null, add_risk)
-
-countsummary(inperson_admb_ed_tnb_risk)
-
-compare_alphas(inperson_admb_ed_tnb_null, inperson_admb_ed_tnb_risk)
-
-# compare to poisson
-
-inperson_admb_ed_tp_risk <- update(inperson_admb_ed_tnb_risk, family = "truncpoiss")
-
-lrtest(inperson_admb_ed_tp_risk, inperson_admb_ed_tnb_risk)
-
-### Add lag and compare
-
-inperson_admb_ed_tnb_risk_ext_binlag <- update(inperson_admb_ed_tnb_risk, add_inperson_binlag)
-
-countsummary(inperson_admb_ed_tnb_risk_ext_binlag)
-
-compare_alphas(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_ext_binlag)
-AICtab(inperson_admb_ed_tnb_risk_lag, inperson_admb_ed_tnb_risk_ext_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_ext_binlag)
-compare_alphas(inperson_admb_ed_tnb_risk, inperson_admb_ed_tnb_risk_ext_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_tnb_ext_binlag, inperson_admb_ed_tnb_risk_ext_binlag)
-compare_alphas(inperson_admb_ed_tnb_ext_binlag, inperson_admb_ed_tnb_risk_ext_binlag)
-
-## poisson risk lag
-
-inperson_admb_ed_tp_risk_ext_binlag <- update(inperson_admb_ed_tnb_risk_ext_binlag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_tp_risk_ext_binlag)
-compare_nested(inperson_admb_ed_tp_risk_ext_binlag, inperson_admb_ed_tnb_risk_ext_binlag)
-
-### Add multilevel
-
-inperson_admb_ed_mtnb_risk <- update(inperson_admb_ed_tnb_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtnb_risk)
-
-compare_nested(inperson_admb_ed_tnb_risk, inperson_admb_ed_mtnb_risk)
-
-# multilevel poisson
-
-inperson_admb_ed_mtp_risk <- update(inperson_admb_ed_tp_risk, add_nom)
-
-countsummary(inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtp_risk)
-
-compare_nested(inperson_admb_ed_tp_risk, inperson_admb_ed_mtp_risk)
-
-## add lag
-
-inperson_admb_ed_mtnb_risk_ext_binlag <- update(inperson_admb_ed_mtnb_risk, add_inperson_binlag)
-
-countsummary(inperson_admb_ed_mtnb_risk_ext_binlag)
-
-compare_nested(inperson_admb_ed_tnb_risk_ext_binlag, inperson_admb_ed_mtnb_risk_ext_binlag)
-
-compare_alphas(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_ext_binlag)
-AICtab(inperson_admb_ed_mtnb_risk_lag, inperson_admb_ed_mtnb_risk_ext_binlag)
-
-### Compare adding lag to risk
-
-lrtest(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_ext_binlag)
-compare_alphas(inperson_admb_ed_mtnb_risk, inperson_admb_ed_mtnb_risk_ext_binlag)
-
-## Compare adding risk to lag
-
-lrtest(inperson_admb_ed_mtnb_ext_binlag, inperson_admb_ed_mtnb_risk_ext_binlag)
-compare_alphas(inperson_admb_ed_mtnb_ext_binlag, inperson_admb_ed_mtnb_risk_ext_binlag)
-
-## m poisson risk lag
-
-inperson_admb_ed_mtp_risk_ext_binlag <- update(inperson_admb_ed_mtnb_risk_ext_binlag,
-                                family ="truncpoiss")
-
-countsummary(inperson_admb_ed_mtp_risk_ext_binlag)
-compare_nested(inperson_admb_ed_mtp_risk_ext_binlag, inperson_admb_ed_mtnb_risk_ext_binlag)
-
-
-
-```
-
-
-
 
 
 # Benchmark stats
