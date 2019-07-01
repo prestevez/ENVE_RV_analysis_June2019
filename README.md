@@ -1,6 +1,6 @@
 # ENVE Event Dependence Study
 
-## Versión 0.3
+## Versión 0.3.1
 
 Estas instrucciones detallan brevemente el procedimiento necesario para correr exitosamente los scripts diseñados para el análisis de la ENVE 2014 en R.
 
@@ -143,4 +143,4 @@ La ejecución es tardada, pero depende del equipo en el que se corra; es normal 
 
 # Resultados
 
-El script automáticamente realizará los análisis requeridos y guardará los resultados en un archivo llamado ENVE_rv_ext_type_June2019.md en la carpeta del proyecto. Asimismo, el programa guardará en una subcarpeta llamada figure/ las gráficas elaboradas en el análisis, y una subcarpeta llamada coef_csv/ con archivos csv con los resultados de los modelos ejecutados.
+El script automáticamente realizará los análisis requeridos y guardará los resultados en un archivo llamado **ENVE_rv_ext_type_July2019.md** en la carpeta del proyecto. Asimismo, el programa guardará en una subcarpeta llamada **figure/** las gráficas elaboradas en el análisis, y una subcarpeta llamada **coef_results/** con archivos csv con los resultados de los modelos ejecutados.
