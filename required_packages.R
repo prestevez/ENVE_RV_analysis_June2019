@@ -13,14 +13,11 @@ packages <- c("devtools",
               "car",
               "downloader",
               "sandwich",
-              "gamlss",
-              "gamlss.tr",
               "coda",
               "R2admb",
-              "texreg",
               "arsenal",
               "bbmle",
               "gridExtra",
               "scales",
-              "victim"
+              "dgof"
           )

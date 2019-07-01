@@ -24,3 +24,13 @@ if(admb_test){
 } else{
     cat("glmmADMB is NOT installed.\nPlease install.\n")
 }
+
+### Check victim
+
+victim_test <- "victim" %in% rownames(installed.packages())
+
+if(victim_test){
+    cat("victim is installed.\n")
+} else{
+    cat("victim is NOT installed.\nPlease install.\n")
+}

@@ -26,6 +26,13 @@ if(!admb_test){
 }
 
 
+# Check and install victim
+
+if(!victim_test){
+    cat("victim not installed. \nInstalling from Github...\n")
+    devtools::install_github("prestevez/victim")
+}
+
 # All packages should now be installed
 
 source("package_checker.R")
