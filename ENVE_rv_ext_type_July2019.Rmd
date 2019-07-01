@@ -136,16 +136,6 @@ mylog <- function(x, center = FALSE){
 
 }
 
-myvif <- function(form, data, family = "binomial"){
-    if(!is_formula(form)) {form <- formula(form)}
-
-    lmmod <- glm(form, data = data,  family = family)
-
-    vifs <- car::vif(lmmod)
-
-    return(vifs)
-}
-
 mkbin <- function(x,n = 0) ifelse(x > n, 1, 0)
 
 capadjust <- function(x, y, K = 0) x/(K-y)
@@ -171,7 +161,7 @@ countsummary <- function(model){
     cat("\n")
     print(car::Anova(model))
     print(lrtest(model))
-    print(myvif(model))
+    print(car::vif(model))
 }
 
 compare_nested <- function(...) {
