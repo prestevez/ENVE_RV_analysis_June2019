@@ -15,26 +15,25 @@ Los paquetes requeridos por este proyecto son los siguientes:
 - "devtools"
 - "foreign"
 - "tidyverse"
+- "Cairo"
 - "knitr"
 - "lazyeval"
 - "RCurl"
 - "glmmTMB"
 - "classInt"
-- "foreign"
 - "reshape2"
 - "lmtest"
 - "car"
 - "downloader"
-- "sandwich"
-- "gamlss"
-- "gamlss.tr"
-- "coda",
-- "R2admb",
-- "texreg",
-- "arsenal",
-- "bbmle",
+- "coda"
+- "R2admb"
+- "arsenal"
+- "bbmle"
 - "gridExtra"
+- "scales"
+- "dgof"
 - "glmmADMB"
+- "victim"
 
 **Es recomendable contar con la [versión más actualizada de R](https://cran.r-project.org).**
 
@@ -57,25 +56,23 @@ Para realizar la instalación manual de los paquetes faltantes, ejecute los coma
 install.packages("devtools")
 install.packages("foreign")
 install.packages("tidyverse")
+install.packages("Cairo")
 install.packages("knitr")
 install.packages("lazyeval")
 install.packages("RCurl")
 install.packages("glmmTMB")
 install.packages("classInt")
-install.packages("foreign")
 install.packages("reshape2")
 install.packages("lmtest")
 install.packages("car")
 install.packages("downloader")
-install.packages("sandwich")
-install.packages("gamlss")
-install.packages("gamlss.tr")
 install.packages("coda")
 install.packages("R2admb")
-install.packages("texreg")
 install.packages("arsenal")
 install.packages("bbmle")
 install.packages("gridExtra")
+install.packages("scales")
+install.packages("dgof")
 
 ```
 
@@ -101,6 +98,11 @@ Rtools permite la instalación de paquetes en R desde el código fuente (*source
 
 Tras la instalación reinicie R y vuelva a correr el comando de instalación desde código fuente.
 
+El paquete "victim" no se encuentra dispoinble en CRAN, por lo que debe de ser instalado desde Github. El script instalador de paquetes instala "victim" si este no está disponible en el sistema. Si desea instalar manualmente el paquete "victim", use el siguiente comando:
+
+```{r}
+devtools::install_github("prestevez/victim")
+```
 
 # Ejecución del script
 
@@ -134,11 +136,11 @@ El proyecto está contenido en un archivo R Markdown que permite elaborar report
 Para correr el análisis, ejecute el siguiente comando en la consola de R:
 
 ```{r}
-knitr::knit("ENVE_rv_ext_type_June2019.Rmd")
+knitr::knit("ENVE_rv_ext_type_July2019.Rmd")
 ```
 
 La ejecución es tardada, pero depende del equipo en el que se corra; es normal que parezca que no hace nada.
 
 # Resultados
 
-El script automáticamente realizará los análisis requeridos y guardará los resultados en un archivo llamado ENVE_rv_ext_type_June2019.md en la carpeta del proyecto. Asimismo, el programa guardará en una subcarpeta llamada figure/ las gráficas elaboradas en el análisis.
+El script automáticamente realizará los análisis requeridos y guardará los resultados en un archivo llamado ENVE_rv_ext_type_June2019.md en la carpeta del proyecto. Asimismo, el programa guardará en una subcarpeta llamada figure/ las gráficas elaboradas en el análisis, y una subcarpeta llamada coef_csv/ con archivos csv con los resultados de los modelos ejecutados.
