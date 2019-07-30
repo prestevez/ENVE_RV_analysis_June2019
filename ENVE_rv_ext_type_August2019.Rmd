@@ -40,7 +40,8 @@ references:
   - year: '2019'
   title: |
    Extortion victimisation: A crime specific approach
-  container-title: Manuscript in preparation (Version: July 26, 2019)
+  container-title: |
+   Manuscript in preparation (Version: July 26, 2019)
 ---
 
 ```{r setup, include=FALSE}
