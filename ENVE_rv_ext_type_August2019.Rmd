@@ -1,5 +1,5 @@
 ---
-title: "Extortion concentration patterns: Analysis by type and event dependence, version 0.3"
+title: "Extortion concentration patterns: Analysis of event dependence, version 0.4"
 author: "Patricio R. Estevez Soto"
 email: "patricio.estevez.14@ucl.ac.uk"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
@@ -34,7 +34,17 @@ references:
   - year: '2019'
   title: |
    Determinants of extortion compliance: Empirical evidence from a victimisation survey
-  container-title: Manuscript in preparation (Submitted June 26, 2019)
+  container-title: Manuscript under review (Submitted June 26, 2019)
+- id: Estevez-Soto2019b
+  type: article-journal
+  author:
+  - family: Estévez-Soto
+    given: Patricio R
+  issued:
+  - year: '2019'
+  title: |
+   Extortion victimisation: A crime specific approach
+  container-title: Manuscript in preparation (Version: July 26, 2019)
 ---
 
 ```{r setup, include=FALSE}
@@ -51,20 +61,11 @@ This script continues the analysis of the patterns of extortion concentration ba
 
 As the likelihood of repeat victimisation is thought to be influenced by how victims respond to a previous event, the second study [@Estevez-Soto2019a] examined the predictors of extortion compliance. Specifically, it sought to answer why most incidents of extortion in Mexico are not complied with. The main hypothesis was that the communication channel used to convey extortion threats was very important in determining compliance, as threats conveyed using lean media (remote extortion) would be less believable than those conveyed using rich media (in-person extortion). The findings suggested that compliance varied widely between remote and in-person extortion, which in turn suggested that extortion analyses should consider these types as different offence classes: the concentration patterns for remote and in-person extortion may be fuelled by different mechanisms.
 
-Thus, Part 1 of this study aims to study the concentration patterns of remote and in-person extortion separately. It will estimate models of incidence (count), prevalence (logit) and concentration (truncated count) on remote and inperson extortion only (no need to estimate extincs models). As there are no repeat cobro de piso incidents, only prevalence models will be estimated for this category. Previous iterations have shown that multilevel specifications may not be appropriate, so those results will be heeded. Also, previous iterations showed that a better functional form for bribes is log(bribes) or poly(bribes), thus these specifications will be used (though appropriate comparisons with bribes will be made).
+In the third study [@Estevez-Soto2019b], findings suggested that the victimisation patterns for in-person and remote extortion were indeed fuelled by different opportunity structures (i.e. different risk factors). Furthermore, they also revealed that the factors fuelling the prevalence of victimisation were not the same as those fuelling concentration, which (in my view) could be an implicit sign of event dependence.
 
-Part 2, in contrast, will incorporate the temporal dimension to the analysis by creating a synthetic panel based on the month the incident was reported to have occurred. The temporal dimension will be used to calculate the time-course of repeat incidents (a histogram of the times between repetitions), as well as to model the probability of a future event, based on measurements from a previous period. As results from Part 1 illustrate that incidence models are not appropriate (the coefficients for prevalence are distinct from those of concentration), this study will only fit models for prevalence and concentration. The models will not include variables that are not significant, based on results from previous iterations.
+Thus, this study aims to explicitly test the role of event dependence in extortion victimisation patterns. The approach involves two analyses. First, the time between repeat events will be analysed to study the time-course of repeat victimisation. This is done to determine if the risks of repeat victimisation follow a risk-decay function as is common in other crime types. Then, the counts of extortion will be classified into two semester terms to facilitate modelling if the prevalence and concentration of extortion in the second semester is associated to extortion victimisation in the previous semester. The analytical approach will be repeated for remote and in-person extortion, as previous studies [@Estevez-Soto2019a; @Estevez-Soto2019b] have shown that these crime types are distinct (as *cobro de piso* showed no repeat incidents, this type of incidents will not be studied here).
 
-Standard packages used to deal with multilevel count data (e.g. `glmmTMB`, `glmmADMB` and `lme4`) do not have truncated distributions (other than truncated-at-zero distributions for hurdle models). In contrast, the `GAMLSS` package allows specifying right-, left-, and interval-truncated count distributions for virtually any situation. However, the package does not allow multilevel specifications (i.e. random intercepts). There is a `gamlssNP` function that allows specifying random intercepts using Gaussian Mixtures, but I've discovered a critical bug in the software that inadvertently drops terms from the specified formula.
-
-Previous iterations of this analysis suggest two things: one, the multilevel specification is important (as random intercepts were deemed to be significant to the models), and two, the benefits of using the 'correct' distribution using left-, and interval-truncation are negligible. Single-level models using the un-truncated distributional assumptions (and the truncated data) showed no substantive differences in effect sizes nor in statistical inference. Furthermore, the `gamlss` estimates appear to be far more unreliable than those using the standard packages.
-
-Previous iterations of the analysis suggest that glmmTMB is notoriously unreliable to estimate truncated models, though untruncated count models are estimated correctly. Thus, glmmADMB will be preferred for untruncated models.
-
-As a sanity check, I will also, repeat main model from study 1, just to make sure all issues are resolved. The main issue is to do an LR test between MTP and MTNB models for uncapped extortions (fit using glmmADMB).
-
-
-The script proceeds as follows: In the next section I set-up the R workspace, load and install the necessary packages and set up other options. This is followed by data input and wrangling. Then the revisions to the compliance study [@Estevez-Soto2019a] are conducted, and this is followed by the analyses for this study.
+Additionally, the models will also incorporate coviariates used in previous studies [@Estevez-Soto2019; @Estevez-Soto2019b], as some of these have been shown to be important factors of risk heterogeneity. however, in this study, these covariates are included only as control variables, thus their effects will not be discussed.
 
 # Set up
 
@@ -90,7 +91,6 @@ library(magrittr)
 library(glmmTMB)
 library(lazyeval)
 library(glmmADMB)
-step <- stats::step
 library(arsenal)
 library(bbmle)
 library(gridExtra)
