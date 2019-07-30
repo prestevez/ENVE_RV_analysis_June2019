@@ -2240,39 +2240,19 @@ countsummary(ed_inp_mtp)
 
 compare_nested(ed_inp_tp, ed_inp_mtp)
 
-
-
-### add risk heterogeneity: previous indicate only ROL might be significant. Use the risk factors for prevalence to compare
+### add risk heterogeneity
 
 # compare to risk factors for prevalence
 
-inp_prv_risk <- update(formula(ed_inp_mlogit_best_risk),
+inp_prv_risk <- update(formula(ed_inp_mlogit_risk),
                     inperson ~ . - (1|NOM_ENT))
 
 ed_inp_tp_risk <- update(ed_inp_tp, inp_prv_risk)
 
 countsummary(ed_inp_tp_risk)
 
-### Add rule of law
 
-ed_inp_tp_risk_rol <- update(ed_inp_tp_risk, . ~ . +
-                scale(Derecho, mean_Derecho, FALSE))
-
-countsummary(ed_inp_tp_risk_rol)
-
-ed_inp_tp_rol <- update(ed_inp_tp, . ~
-                scale(Derecho, mean_Derecho, FALSE))
-
-countsummary(ed_inp_tp_rol)
-
-compare_nested(ed_inp_tp_risk, ed_inp_tp_risk_rol)
-
-compare_nested(ed_inp_tp_rol, ed_inp_tp_risk_rol)
-
-ed_inp_tp_best_risk <- best_model(ed_inp_tp_risk, ed_inp_tp_risk_rol)
-
-ed_inp_tp_best_risk <- best_model(ed_inp_tp_rol, ed_inp_tp_risk_rol)
-
+ed_inp_tp_best_risk <- ed_inp_tp_risk
 
 ## adding lag to risk model
 ed_inp_tp_risk_lag <- update(ed_inp_tp_best_risk,
