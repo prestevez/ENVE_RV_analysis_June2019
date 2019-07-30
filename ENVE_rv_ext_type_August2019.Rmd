@@ -651,24 +651,6 @@ Fix business size category.
 
 ```{r time-course}
 
-table(enve_nona$month, useNA = "ifany")
-
-sum(table(enve_nona$month, useNA = "ifany"))
-
-enve_nona %>%
-    filter(month < 13) %$%
-    table(month, useNA = "ifany") %>% sum
-
-enve_nona %>%
-    filter(month < 13) %$%
-    table(month, useNA = "ifany")
-
-enve_nona %>%
-    filter(month < 13) %$%
-    table(month, useNA = "ifany") %>%
-    chisq.test(.)
-
-
 ## Tables and tests by type
 
 enve_nona %>%
@@ -694,15 +676,6 @@ enve_nona %>%
     chisq.test
 
 # plots
-enve_nona %>%
-    filter(month < 13) %>%
-    ggplot(aes(month)) +
-    geom_bar() +
-    theme_bw() +
-    scale_x_continuous("Month", breaks = 1:12) +
-    ylab("Extortion incidents") +
-    ggtitle("Monthly count of extortion incidents")
-
 
 enve_nona %>%
     filter(month < 13) %>%
@@ -721,23 +694,6 @@ ggsave(filename = "figure/monthly_counts_extortion.pdf", width = 7, height = 4)
 
 
 # events per semester
-
-enve_nona %>%
-    filter(month < 13) %>%
-    mutate(sem = case_when(
-        month < 7   ~ 0,
-        month >= 7  ~ 1
-    ))%$%
-    table(sem, useNA = "ifany")
-
-enve_nona %>%
-    filter(month < 13) %>%
-    mutate(sem = case_when(
-        month < 7   ~ 0,
-        month >= 7  ~ 1
-    ))%$%
-    table(sem, useNA = "ifany") %>%
-    chisq.test
 
 ### per type
 
