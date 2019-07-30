@@ -1198,7 +1198,7 @@ enve_lag_nm_sem1$size_old <- enve_lag_nm_sem1$size
 
 sizelevels <- levels(enve_lag_nm_sem1$size)
 
-levels(enve_lag_nm_sem1$size) <- sizelevels[c(1, 3, 3, 4)]
+levels(enve_lag_nm_sem1$size) <- c('Large', 'MedSmall', 'MedSmall', 'Micro')
 
 
 ```
@@ -2025,18 +2025,27 @@ countsummary(ed_inp_mlogit)
 
 compare_nested(ed_inp_logit, ed_inp_mlogit)
 
-## null models
-
-ed_inp_mlogit_null <- update(ed_inp_mlogit, . ~ . - lag_inperson)
-
-summary(ed_inp_mlogit_null)
-
 ### Risk heterogeneity
 
-inp_preval_risk_f <- update(formula(inp_mlogit_pars_95),
-                mkbin(inperson) ~ .)
+add_risk_polyb <-  . ~ . +  poly(bribes, 2, raw = TRUE) +
+                    yearsquant +
+                    subsector_new +
+                    size +
+                    mylog(bribes_abvic, mean_bribes) +
+                    mylog(armas, mean_armas) +
+                    mylog(drogas, mean_drogas) +
+                    mylog(N, mean_N) +
+                    mylog(poblacion, mean_poblacion) +
+                    scale(General, mean_General, FALSE) +
+                    scale(Derecho, mean_Derecho, FALSE)
 
-ed_inp_mlogit_risk <- update(ed_inp_mlogit, inp_preval_risk_f)
+ed_inp_mlogit_risk_lag <- update(ed_inp_mlogit, add_risk_polyb)
+
+countsummary(ed_inp_mlogit_risk_lag)
+
+### No lag only risk
+
+ed_inp_mlogit_risk <- update(ed_inp_mlogit_risk_lag, . ~ . - lag_inperson)
 
 countsummary(ed_inp_mlogit_risk)
 
@@ -2050,32 +2059,6 @@ countsummary(ed_inp_mlogit_risk_b)
 
 compare_nested(ed_inp_mlogit_risk_b, ed_inp_mlogit_risk)
 
-best_model <- function(m1, m2){
-    aic_m1 <- AIC(m1)
-    aic_m2 <- AIC(m2)
-
-    m1_better <- aic_m1 < aic_m2
-
-    if(m1_better){
-        best_model <- m1
-        mod_name <- deparse(substitute(m1))
-    } else{
-        best_model <- m2
-        mod_name <- deparse(substitute(m2))
-    }
-    message(paste0("\n", mod_name, " is better.\n"))
-    return(best_model)
-}
-
-ed_inp_mlogit_best_risk <- best_model(ed_inp_mlogit_risk, ed_inp_mlogit_risk_b)
-
-#### add lag to risk
-
-ed_inp_mlogit_risk_lag <- update(ed_inp_mlogit_best_risk,
-            . ~ lag_inperson + .)
-
-countsummary(ed_inp_mlogit_risk_lag)
-
 
 ### Test multilevel
 
@@ -2088,14 +2071,14 @@ compare_nested(ed_inp_logit_risk_lag, ed_inp_mlogit_risk_lag)
 
 #### Risk to lag
 
-compare_nested(ed_inp_mlogit_best_risk, ed_inp_mlogit_risk_lag)
+compare_nested(ed_inp_mlogit_risk, ed_inp_mlogit_risk_lag)
 
 #### Lag to risk
 
 compare_nested(ed_inp_mlogit, ed_inp_mlogit_risk_lag)
 
 coef_csv(ed_inp_mlogit)
-coef_csv(ed_inp_mlogit_best_risk)
+coef_csv(ed_inp_mlogit_risk)
 coef_csv(ed_inp_mlogit_risk_lag)
 
 ## Then lag_rmt_adj
@@ -2120,7 +2103,7 @@ AICtab(ed_inp_mlogit_adj, ed_inp_mlogit)
 
 #### add adj lag
 
-ed_inp_mlogit_risk_lag_adj <- update(ed_inp_mlogit_best_risk,
+ed_inp_mlogit_risk_lag_adj <- update(ed_inp_mlogit_risk,
             . ~ lag_inp_adj + .)
 
 countsummary(ed_inp_mlogit_risk_lag_adj)
@@ -2168,7 +2151,7 @@ AICtab(ed_inp_mlogit_comp, ed_inp_mlogit_adj, ed_inp_mlogit)
 
 #### add comp lag to risk
 
-ed_inp_mlogit_risk_lag_comp <- update(ed_inp_mlogit_best_risk,
+ed_inp_mlogit_risk_lag_comp <- update(ed_inp_mlogit_risk,
             . ~ lag_inp_comp_cat + .)
 
 countsummary(ed_inp_mlogit_risk_lag_comp)
@@ -2184,6 +2167,7 @@ countsummary(ed_inp_logit_risk_lag_comp)
 compare_nested(ed_inp_logit_risk_lag_comp,
                 ed_inp_mlogit_risk_lag_comp)
 
+
 #### Risk to lag
 
 compare_nested(ed_inp_mlogit_risk, ed_inp_mlogit_risk_lag_comp)
@@ -2194,6 +2178,31 @@ compare_nested(ed_inp_mlogit_comp, ed_inp_mlogit_risk_lag_comp)
 
 coef_csv(ed_inp_mlogit_comp)
 coef_csv(ed_inp_mlogit_risk_lag_comp)
+
+
+# VIF for these
+
+
+ed_inp_logit_risk_lag_glm <- glm(formula(ed_inp_logit_risk_lag),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_inp_logit_risk_lag_glm)
+car::vif(ed_inp_logit_risk_lag_glm)
+
+ed_inp_logit_risk_lag_adj_glm <- glm(formula(ed_inp_logit_risk_lag_adj),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_inp_logit_risk_lag_adj_glm)
+car::vif(ed_inp_logit_risk_lag_glm)
+
+ed_inp_logit_risk_lag_comp_glm <- glm(formula(ed_inp_logit_risk_lag_comp),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_inp_logit_risk_lag_comp_glm)
+car::vif(ed_inp_logit_risk_lag_comp_glm)
 
 
 ```
