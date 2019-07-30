@@ -1073,9 +1073,9 @@ enve_bus_lev_semester %$%
     CVE_UNICA %in% non_month_cu %>% table
 
 
-enve_bus_lev %>%
-    group_by(CVE_UNICA) %>%
-    summarise(n = max(extincs)) %$% range(n)
+#enve_bus_lev %>%
+#    group_by(CVE_UNICA) %>%
+#    summarise(n = max(extincs)) %$% range(n)
 
 enve_bus_lev_semester %>%
     group_by(CVE_UNICA, semester) %>%
@@ -1192,6 +1192,15 @@ levels(enve_lag_nm_sem1$subsector_new) <- c('Retail',
                                         'Wholesale')
 
 
+## Change Business size categories
+
+enve_lag_nm_sem1$size_old <- enve_lag_nm_sem1$size
+
+sizelevels <- levels(enve_lag_nm_sem1$size)
+
+levels(enve_lag_nm_sem1$size) <- sizelevels[c(1, 3, 3, 4)]
+
+
 ```
 
 ### EDA
@@ -1203,43 +1212,10 @@ Examine EDA (and models) from previous iterations see if some categories indicat
 
 ```{r semester-eda}
 
-### For overall extortions first
-
-
-ed_extincs_eda_f <- mkbin(extincs) ~ factor(mkbin(lag_extincs)) +
-                                   factor(mkbin(lag_complied)) +
-                                   bribes +
-                                   yearsquant +
-                                   size +
-                                   subsector_new
-
-ed_extincs_eda <- tableby(ed_extincs_eda_f,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
-
-summary(ed_extincs_eda,
-            pfootnote = TRUE)
-
-## repeat extortions
-
-ed_extincs_eda_f_repeats <- mkbin(extincs, 1) ~ factor(mkbin(lag_extincs)) +
-                                   factor(mkbin(lag_complied)) +
-                                   bribes +
-                                   yearsquant +
-                                   size +
-                                   subsector_new
-
-ed_extincs_eda_reps <- tableby(ed_extincs_eda_f_repeats,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
-
-summary(ed_extincs_eda_reps,
-            pfootnote = TRUE)
-
-
 #### Remote extortions
 
 ed_remote_eda_f <- mkbin(remote) ~ factor(mkbin(lag_remote)) +
+                                   factor(mkbin(lag_remote, 1)) +
                                    factor(mkbin(lag_comp_remote)) +
                                    bribes +
                                    yearsquant +
@@ -1247,24 +1223,18 @@ ed_remote_eda_f <- mkbin(remote) ~ factor(mkbin(lag_remote)) +
                                    subsector_new
 
 ed_remote_eda <- tableby(ed_remote_eda_f,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1)
 
 summary(ed_remote_eda,
             pfootnote = TRUE)
 
 ## repeat extortions
 
-ed_remote_eda_f_repeats <- mkbin(remote, 1) ~ factor(mkbin(lag_remote)) +
-                                   factor(mkbin(lag_comp_remote)) +
-                                   bribes +
-                                   yearsquant +
-                                   size +
-                                   subsector_new
+
+ed_remote_eda_f_repeats <- update(ed_remote_eda_f, mkbin(remote, 1) ~ .)
 
 ed_remote_eda_reps <- tableby(ed_remote_eda_f_repeats,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1)
 
 summary(ed_remote_eda_reps,
             pfootnote = TRUE)
@@ -1272,6 +1242,7 @@ summary(ed_remote_eda_reps,
 #### In person extortions
 
 ed_inp_eda_f <- mkbin(inperson) ~ factor(mkbin(lag_inperson)) +
+                                   factor(mkbin(lag_inperson, 1)) +
                                    factor(mkbin(lag_comp_inperson)) +
                                    bribes +
                                    yearsquant +
@@ -1279,76 +1250,20 @@ ed_inp_eda_f <- mkbin(inperson) ~ factor(mkbin(lag_inperson)) +
                                    subsector_new
 
 ed_inp_eda <- tableby(ed_inp_eda_f,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1)
 
 summary(ed_inp_eda,
             pfootnote = TRUE)
 
 ## repeat extortions
 
-ed_inp_eda_f_repeats <- mkbin(inperson, 1) ~ factor(mkbin(lag_inperson)) +
-                                   factor(mkbin(lag_comp_inperson)) +
-                                   bribes +
-                                   yearsquant +
-                                   size +
-                                   subsector_new
+ed_inp_eda_f_repeats <- update(ed_inp_eda_f, mkbin(inperson, 1) ~ .)
 
 ed_inp_eda_reps <- tableby(ed_inp_eda_f_repeats,
-                        data  = enve_lag_nm_sem1,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1)
 
 summary(ed_inp_eda_reps,
             pfootnote = TRUE)
-
-```
-
-EDA by state
-
-```{r state-level-descriptives-event-dependence}
-
-
-# State level prevalence
-
-state_control <- tableby.control(cat.stats = "countrowpct",
-                                total = FALSE,
-                                test = FALSE)
-# remote
-eda_state_remote_ed <- tableby(mkbin(remote) ~ NOM_ENT,
-                        data  = enve_lag_nm_sem1,
-                        control = state_control)
-
-summary(eda_state_remote_ed,
-            pfootnote = TRUE)
-
-# repeat remote victims
-
-eda_state_remote_repeat_ed <- tableby(mkbin(remote, 1) ~ NOM_ENT,
-                        data  = subset(enve_lag_nm_sem1, remote > 0),
-                        control = state_control)
-
-summary(eda_state_remote_repeat_ed,
-            pfootnote = TRUE)
-
-
-# inperson_wocp
-
-eda_state_inperson_ed <- tableby(mkbin(inperson) ~ NOM_ENT,
-                        data  = enve_lag_nm_sem1,
-                        control = state_control)
-
-summary(eda_state_inperson_ed,
-            pfootnote = TRUE)
-
-# repeat inperson victims
-
-eda_state_inp_repeat_ed <- tableby(mkbin(inperson, 1) ~ NOM_ENT,
-                        data  = subset(enve_lag_nm_sem1, inperson > 0),
-                        control = state_control)
-
-summary(eda_state_inp_repeat_ed,
-            pfootnote = TRUE)
-
 
 ```
 
@@ -1367,7 +1282,7 @@ enve_lag_nm_sem1 %>%
             Remote = "remote",
             "In person" = "inperson")) %>%
     group_by(variable) %>%
-    ggplot(aes(value, fill =  variable)) +
+    ggplot(aes(value, fill = variable)) +
     geom_bar() +
     scale_y_sqrt("Businesses") +
     scale_x_continuous(breaks = 0:7) +
@@ -1405,7 +1320,7 @@ enve_lag_nm_sem1 %>%
 ggsave(filename = "figure/capped_dist_log1p_sem1.pdf", width = 7, height = 4)
 
 
-# Semester 2
+# Semester 0
 
 enve_lag_nm_sem1 %>%
     ungroup %>%
@@ -1477,8 +1392,13 @@ Modelling:
 - Prevalence
 - Concentration
 
-- Fit full, null and restricted model.
-- Do checks on restricted models.
+Follow this procedure:
+
+1. Fit model with lag (test overdispersion and multilevel)
+2. Add risk controls
+2. Test overdispersion and multilevel
+3. Repeat for other measures of lag (adj and compliance)
+
 
 Generate a compliance categorical (Not victimised, victimised but not complied, complied)
 
@@ -1552,28 +1472,10 @@ EDA of the new variables
 
 ```{r eda-comp-cats}
 
-
-comp_cat_extincs_eda <- tableby(mkbin(extincs) ~ lag_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
-
-summary(comp_cat_extincs_eda,
-            pfootnote = TRUE)
-
-# Repeat extortions
-
-comp_cat_extincs_eda_r <- tableby(mkbin(extincs, 1) ~ lag_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
-
-summary(comp_cat_extincs_eda_r,
-            pfootnote = TRUE)
-
 # remote extortions
 
 comp_cat_rmt_eda <- tableby(mkbin(remote) ~ lag_rmt_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(comp_cat_rmt_eda,
             pfootnote = TRUE)
@@ -1581,8 +1483,7 @@ summary(comp_cat_rmt_eda,
 # repeat remote extortions
 
 comp_cat_rmt_eda_r <- tableby(mkbin(remote, 1) ~ lag_rmt_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(comp_cat_rmt_eda_r,
             pfootnote = TRUE)
@@ -1591,8 +1492,7 @@ summary(comp_cat_rmt_eda_r,
 # inperson extortions
 
 comp_cat_inp_eda <- tableby(mkbin(inperson) ~ lag_inp_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(comp_cat_inp_eda,
             pfootnote = TRUE)
@@ -1600,8 +1500,7 @@ summary(comp_cat_inp_eda,
 # repeat inperson extortions
 
 comp_cat_inp_eda_r <- tableby(mkbin(inperson, 1) ~ lag_inp_comp_cat,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(comp_cat_inp_eda_r,
             pfootnote = TRUE)
@@ -1613,28 +1512,10 @@ summary(comp_cat_inp_eda_r,
 
 ```{r eda-adj-lag}
 
-
-adj_lag_extincs_eda <- tableby(mkbin(extincs) ~ lag_extincs_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
-
-summary(adj_lag_extincs_eda,
-            pfootnote = TRUE)
-
-# Repeat extortions
-
-adj_lag_extincs_eda_r <- tableby(mkbin(extincs, 1) ~ lag_extincs_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
-
-summary(adj_lag_extincs_eda_r,
-            pfootnote = TRUE)
-
 # remote extortions
 
 adj_lag_rmt_eda <- tableby(mkbin(remote) ~ lag_rmt_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(adj_lag_rmt_eda,
             pfootnote = TRUE)
@@ -1642,8 +1523,7 @@ summary(adj_lag_rmt_eda,
 # repeat remote extortions
 
 adj_lag_rmt_eda_r <- tableby(mkbin(remote, 1) ~ lag_rmt_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(adj_lag_rmt_eda_r,
             pfootnote = TRUE)
@@ -1652,8 +1532,7 @@ summary(adj_lag_rmt_eda_r,
 # inperson extortions
 
 adj_lag_inp_eda <- tableby(mkbin(inperson) ~ lag_inp_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(adj_lag_inp_eda,
             pfootnote = TRUE)
@@ -1661,12 +1540,10 @@ summary(adj_lag_inp_eda,
 # repeat inperson extortions
 
 adj_lag_inp_eda_r <- tableby(mkbin(inperson, 1) ~ lag_inp_adj,
-                        data  = enve_lag_nm_sem1_nona,
-                        control = my_controls)
+                        data  = enve_lag_nm_sem1_nona)
 
 summary(adj_lag_inp_eda_r,
             pfootnote = TRUE)
-
 
 
 
@@ -1686,6 +1563,8 @@ Do only prevalence (logit) and concentration (truncated count) models.
 
 # Bivariate model of event dependence
 
+add_nom <- . ~ . + (1|NOM_ENT)
+
 ed_rmt_logit <- glmmTMB(mkbin(remote) ~ lag_remote,
                         data = enve_lag_nm_sem1_nona,
                         family = "binomial")
@@ -1700,36 +1579,43 @@ countsummary(ed_rmt_mlogit)
 
 compare_nested(ed_rmt_logit, ed_rmt_mlogit)
 
-## null models
-
-ed_rmt_mlogit_null <- update(ed_rmt_mlogit, . ~ . - lag_remote)
-
-summary(ed_rmt_mlogit_null)
 
 ### Risk heterogeneity
 
-ed_rmt_mlogit_risk <- update(ed_rmt_mlogit, formula(rmt_mlogit_pars))
+add_risk <-  . ~ . + mylog(bribes) +
+                    yearsquant +
+                    subsector_new +
+                    size +
+                    mylog(bribes_abvic, mean_bribes) +
+                    mylog(armas, mean_armas) +
+                    mylog(drogas, mean_drogas) +
+                    mylog(N, mean_N) +
+                    mylog(poblacion, mean_poblacion) +
+                    scale(General, mean_General, FALSE) +
+                    scale(Derecho, mean_Derecho, FALSE)
 
-countsummary(ed_rmt_mlogit_risk)
 
-#### add lag to risk
-
-ed_rmt_mlogit_risk_lag <- update(ed_rmt_mlogit_risk,
-            . ~ lag_remote + .)
+ed_rmt_mlogit_risk_lag <- update(ed_rmt_mlogit, add_risk)
 
 countsummary(ed_rmt_mlogit_risk_lag)
 
+## Compare to single level
 
-### Test multilevel
-
-ed_rmt_logit_risk_lag <- update(ed_rmt_mlogit_risk_lag,
-            . ~ . - (1|NOM_ENT))
+ed_rmt_logit_risk_lag <- update(ed_rmt_mlogit_risk_lag, . ~ . - (1|NOM_ENT))
 
 countsummary(ed_rmt_logit_risk_lag)
 
 compare_nested(ed_rmt_logit_risk_lag, ed_rmt_mlogit_risk_lag)
 
-#### Risk to lag
+#### Remove lag from risk_lag
+
+ed_rmt_mlogit_risk <- update(ed_rmt_mlogit_risk_lag,
+            . ~ . - lag_remote)
+
+countsummary(ed_rmt_mlogit_risk)
+
+
+# lag to risk
 
 compare_nested(ed_rmt_mlogit_risk, ed_rmt_mlogit_risk_lag)
 
@@ -1837,6 +1723,32 @@ compare_nested(ed_rmt_mlogit_comp, ed_rmt_mlogit_risk_lag_comp)
 
 coef_csv(ed_rmt_mlogit_comp)
 coef_csv(ed_rmt_mlogit_risk_lag_comp)
+
+
+### Test VIF
+
+### Calculate VIF of these vars
+
+ed_rmt_logit_risk_lag_glm <- glm(formula(ed_rmt_logit_risk_lag),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_rmt_logit_risk_lag_glm)
+car::vif(ed_rmt_logit_risk_lag_glm)
+
+ed_rmt_logit_risk_lag_adj_glm <- glm(formula(ed_rmt_logit_risk_lag_adj),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_rmt_logit_risk_lag_adj_glm)
+car::vif(ed_rmt_logit_risk_lag_glm)
+
+ed_rmt_logit_risk_lag_comp_glm <- glm(formula(ed_rmt_logit_risk_lag_comp),
+                                    data = enve_lag_nm_sem1_nona,
+                                    family = "binomial")
+
+summary(ed_rmt_logit_risk_lag_comp_glm)
+car::vif(ed_rmt_logit_risk_lag_comp_glm)
 
 
 ```
