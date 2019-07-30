@@ -1759,7 +1759,7 @@ Next, estimate the effect of event dependence on concentration.
 Begin with Poisson, (nb may be significant).
 Mutilevel not significant
 Use ADMB
-It appears only size is significant risk factor.
+
 
 ```{r remote-event-dependence-concentration}
 
@@ -1799,7 +1799,7 @@ compare_nested(ed_rmt_tnb, ed_rmt_mtnb)
 
 compare_nested(ed_rmt_mtp, ed_rmt_mtnb)
 
-### add risk heterogeneity: previous indicate only size is significant (also maybe subsector, drogas and general)
+### add risk heterogeneity
 
 # compare to risk factors for prevalence
 
@@ -1810,13 +1810,6 @@ ed_rmt_tp_risk_full <- update(ed_rmt_tp, rmt_prv_risk)
 
 countsummary(ed_rmt_tp_risk_full)
 
-## compare to previous results (only size sig)
-
-ed_rmt_tp_risk_pars <- update(ed_rmt_tp, . ~ + size)
-
-countsummary(ed_rmt_tp_risk_pars)
-
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_full)
 
 # nb
 
@@ -1827,71 +1820,15 @@ countsummary(ed_rmt_tnb_risk_full)
 
 compare_nested(ed_rmt_tp_risk_full, ed_rmt_tnb_risk_full)
 
-ed_rmt_tnb_risk_pars <- update(ed_rmt_tp_risk_pars,
-                    family = "truncnbinom")
-
-countsummary(ed_rmt_tnb_risk_pars)
-
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tnb_risk_pars)
-compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_full)
-
-## multilevel
-
-ed_rmt_mtp_risk_full <- update(ed_rmt_tp_risk_full, add_nom)
-
-countsummary(ed_rmt_mtp_risk_full)
-
-compare_nested(ed_rmt_tp_risk_full, ed_rmt_mtp_risk_full)
-
-## compare to previous results (only size sig)
-
-ed_rmt_mtp_risk_pars <- update(ed_rmt_mtp, . ~ + size)
-
-countsummary(ed_rmt_mtp_risk_pars)
-
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_mtp_risk_pars)
-compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_full)
-
-# nb
-
-ed_rmt_mtnb_risk_full <- update(ed_rmt_mtp_risk_full,
-                    family = "truncnbinom")
-
-countsummary(ed_rmt_mtnb_risk_full)
-
-compare_nested(ed_rmt_tnb_risk_full, ed_rmt_mtnb_risk_full)
-compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtnb_risk_full)
-
-ed_rmt_mtnb_risk_pars <- update(ed_rmt_mtp_risk_pars,
-                    family = "truncnbinom")
-
-countsummary(ed_rmt_mtnb_risk_pars)
-
-compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_mtnb_risk_pars)
-compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtnb_risk_pars)
-compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_full)
-
 ## adding lag to risk model
-ed_rmt_tp_risk_pars_lag <- update(ed_rmt_tp_risk_pars,
-                        . ~ lag_remote + .)
-
-countsummary(ed_rmt_tp_risk_pars_lag)
 
 ed_rmt_tp_risk_lag <- update(ed_rmt_tp_risk_full,
                         . ~ lag_remote + .)
 
 countsummary(ed_rmt_tp_risk_lag)
 
-compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_tp_risk_lag)
 
 ### nb
-
-ed_rmt_tnb_risk_pars_lag <- update(ed_rmt_tp_risk_pars_lag,
-                        family = "truncnbinom")
-
-countsummary(ed_rmt_tnb_risk_pars_lag)
-
-compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_tnb_risk_pars_lag)
 
 ed_rmt_tnb_risk_lag <- update(ed_rmt_tp_risk_lag,
                         family = "truncnbinom")
@@ -1900,16 +1837,7 @@ countsummary(ed_rmt_tnb_risk_lag)
 
 compare_nested(ed_rmt_tp_risk_lag, ed_rmt_tnb_risk_lag)
 
-compare_nested(ed_rmt_tnb_risk_pars_lag, ed_rmt_tnb_risk_lag)
-
 ### multilevel
-
-ed_rmt_mtp_risk_pars_lag <- update(ed_rmt_tp_risk_pars_lag,
-                        add_nom)
-
-countsummary(ed_rmt_mtp_risk_pars_lag)
-
-compare_nested(ed_rmt_tp_risk_pars_lag, ed_rmt_mtp_risk_pars_lag)
 
 ed_rmt_mtp_risk_lag <- update(ed_rmt_tp_risk_lag,
                         add_nom)
@@ -1918,76 +1846,22 @@ countsummary(ed_rmt_mtp_risk_lag)
 
 compare_nested(ed_rmt_tp_risk_lag, ed_rmt_mtp_risk_lag)
 
-compare_nested(ed_rmt_mtp_risk_pars_lag, ed_rmt_mtp_risk_lag)
-
-### mtnb
-
-ed_rmt_mtnb_risk_pars_lag <- update(ed_rmt_tnb_risk_pars_lag,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_pars_lag)
-
-compare_nested(ed_rmt_tnb_risk_pars_lag, ed_rmt_mtnb_risk_pars_lag)
-
-compare_nested(ed_rmt_mtp_risk_pars_lag, ed_rmt_mtnb_risk_pars_lag)
-
-ed_rmt_mtnb_risk_lag <- update(ed_rmt_tnb_risk_lag,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_lag)
-
-compare_nested(ed_rmt_tnb_risk_lag, ed_rmt_mtnb_risk_lag)
-
-compare_nested(ed_rmt_mtp_risk_lag, ed_rmt_mtnb_risk_lag)
-
-compare_nested(ed_rmt_mtnb_risk_pars_lag, ed_rmt_mtnb_risk_lag)
-
 
 ## significance of risk to lag
 
 compare_nested(ed_rmt_tp, ed_rmt_tp_risk_lag)
-compare_nested(ed_rmt_tp, ed_rmt_tp_risk_pars_lag)
-
-compare_nested(ed_rmt_tnb, ed_rmt_tnb_risk_lag)
-compare_nested(ed_rmt_tnb, ed_rmt_tnb_risk_pars_lag)
-
-compare_nested(ed_rmt_mtp, ed_rmt_mtp_risk_lag)
-compare_nested(ed_rmt_mtp, ed_rmt_mtp_risk_pars_lag)
-
-compare_nested(ed_rmt_mtnb, ed_rmt_mtnb_risk_lag)
-compare_nested(ed_rmt_mtnb, ed_rmt_mtnb_risk_pars_lag)
 
 ## significance of lag to risk
 
 compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag)
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag)
 
-compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag)
-compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag)
-
-compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag)
-compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag)
-
-compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag)
-compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag)
 
 ## save as csv
 
 coef_csv(ed_rmt_tp)
 coef_csv(ed_rmt_tp_risk_lag)
-coef_csv(ed_rmt_tp_risk_pars_lag)
+coef_csv(ed_rmt_tp_risk_full)
 
-coef_csv(ed_rmt_tnb)
-coef_csv(ed_rmt_tnb_risk_lag)
-coef_csv(ed_rmt_tnb_risk_pars_lag)
-
-coef_csv(ed_rmt_mtp)
-coef_csv(ed_rmt_mtp_risk_lag)
-coef_csv(ed_rmt_mtp_risk_pars_lag)
-
-coef_csv(ed_rmt_mtnb)
-coef_csv(ed_rmt_mtnb_risk_lag)
-coef_csv(ed_rmt_mtnb_risk_pars_lag)
 
 ## repeat for adjusted lag
 
@@ -2012,37 +1886,17 @@ countsummary(ed_rmt_mtp_adj)
 
 compare_nested(ed_rmt_tp_adj, ed_rmt_mtp_adj)
 
-#negbin
-ed_rmt_mtnb_adj <- update(ed_rmt_tnb_adj, add_nom)
-
-countsummary(ed_rmt_mtnb_adj)
-
-compare_nested(ed_rmt_tnb_adj, ed_rmt_mtnb_adj)
-
-compare_nested(ed_rmt_mtp_adj, ed_rmt_mtnb_adj)
 
 
 ## adding lag to risk model
-ed_rmt_tp_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars,
-                        . ~ lag_rmt_adj + .)
-
-countsummary(ed_rmt_tp_risk_pars_lag_adj)
 
 ed_rmt_tp_risk_lag_adj <- update(ed_rmt_tp_risk_full,
                         . ~ lag_rmt_adj + .)
 
 countsummary(ed_rmt_tp_risk_lag_adj)
 
-compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_tp_risk_lag_adj)
 
 ### nb
-
-ed_rmt_tnb_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars_lag_adj,
-                        family = "truncnbinom")
-
-countsummary(ed_rmt_tnb_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_tnb_risk_pars_lag_adj)
 
 ed_rmt_tnb_risk_lag_adj <- update(ed_rmt_tp_risk_lag_adj,
                         family = "truncnbinom")
@@ -2051,16 +1905,9 @@ countsummary(ed_rmt_tnb_risk_lag_adj)
 
 compare_nested(ed_rmt_tp_risk_lag_adj, ed_rmt_tnb_risk_lag_adj)
 
-compare_nested(ed_rmt_tnb_risk_pars_lag_adj, ed_rmt_tnb_risk_lag_adj)
 
 ### multilevel
 
-ed_rmt_mtp_risk_pars_lag_adj <- update(ed_rmt_tp_risk_pars_lag_adj,
-                        add_nom)
-
-countsummary(ed_rmt_mtp_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_tp_risk_pars_lag_adj, ed_rmt_mtp_risk_pars_lag_adj)
 
 ed_rmt_mtp_risk_lag_adj <- update(ed_rmt_tp_risk_lag_adj,
                         add_nom)
@@ -2069,76 +1916,19 @@ countsummary(ed_rmt_mtp_risk_lag_adj)
 
 compare_nested(ed_rmt_tp_risk_lag_adj, ed_rmt_mtp_risk_lag_adj)
 
-compare_nested(ed_rmt_mtp_risk_pars_lag_adj, ed_rmt_mtp_risk_lag_adj)
-
-### mtnb
-
-ed_rmt_mtnb_risk_pars_lag_adj <- update(ed_rmt_tnb_risk_pars_lag_adj,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_tnb_risk_pars_lag_adj, ed_rmt_mtnb_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_mtp_risk_pars_lag_adj, ed_rmt_mtnb_risk_pars_lag_adj)
-
-ed_rmt_mtnb_risk_lag_adj <- update(ed_rmt_tnb_risk_lag_adj,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_lag_adj)
-
-compare_nested(ed_rmt_tnb_risk_lag_adj, ed_rmt_mtnb_risk_lag_adj)
-
-compare_nested(ed_rmt_mtp_risk_lag_adj, ed_rmt_mtnb_risk_lag_adj)
-
-compare_nested(ed_rmt_mtnb_risk_pars_lag_adj, ed_rmt_mtnb_risk_lag_adj)
-
 
 ## significance of risk to lag
 
 compare_nested(ed_rmt_tp_adj, ed_rmt_tp_risk_lag_adj)
-compare_nested(ed_rmt_tp_adj, ed_rmt_tp_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_tnb_adj, ed_rmt_tnb_risk_lag_adj)
-compare_nested(ed_rmt_tnb_adj, ed_rmt_tnb_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_mtp_adj, ed_rmt_mtp_risk_lag_adj)
-compare_nested(ed_rmt_mtp_adj, ed_rmt_mtp_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_mtnb_adj, ed_rmt_mtnb_risk_lag_adj)
-compare_nested(ed_rmt_mtnb_adj, ed_rmt_mtnb_risk_pars_lag_adj)
 
 ## significance of lag to risk
 
 compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag_adj)
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag_adj)
-compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag_adj)
-compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag_adj)
-
-compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag_adj)
-compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag_adj)
 
 ## save as csv
 
 coef_csv(ed_rmt_tp_adj)
 coef_csv(ed_rmt_tp_risk_lag_adj)
-coef_csv(ed_rmt_tp_risk_pars_lag_adj)
-
-coef_csv(ed_rmt_tnb_adj)
-coef_csv(ed_rmt_tnb_risk_lag_adj)
-coef_csv(ed_rmt_tnb_risk_pars_lag_adj)
-
-coef_csv(ed_rmt_mtp_adj)
-coef_csv(ed_rmt_mtp_risk_lag_adj)
-coef_csv(ed_rmt_mtp_risk_pars_lag_adj)
-
-coef_csv(ed_rmt_mtnb_adj)
-coef_csv(ed_rmt_mtnb_risk_lag_adj)
-coef_csv(ed_rmt_mtnb_risk_pars_lag_adj)
 
 
 ## repeat for comp lag categories
@@ -2164,37 +1954,15 @@ countsummary(ed_rmt_mtp_comp)
 
 compare_nested(ed_rmt_tp_comp, ed_rmt_mtp_comp)
 
-#negbin
-ed_rmt_mtnb_comp <- update(ed_rmt_tnb_comp, add_nom)
-
-countsummary(ed_rmt_mtnb_comp)
-
-compare_nested(ed_rmt_tnb_comp, ed_rmt_mtnb_comp)
-
-compare_nested(ed_rmt_mtp_comp, ed_rmt_mtnb_comp)
-
 
 ## adding lag to risk model
-ed_rmt_tp_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars,
-                        . ~ lag_rmt_comp_cat + .)
-
-countsummary(ed_rmt_tp_risk_pars_lag_comp)
 
 ed_rmt_tp_risk_lag_comp <- update(ed_rmt_tp_risk_full,
                         . ~ lag_rmt_comp_cat + .)
 
 countsummary(ed_rmt_tp_risk_lag_comp)
 
-compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_tp_risk_lag_comp)
-
 ### nb
-
-ed_rmt_tnb_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars_lag_comp,
-                        family = "truncnbinom")
-
-countsummary(ed_rmt_tnb_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_tnb_risk_pars_lag_comp)
 
 ed_rmt_tnb_risk_lag_comp <- update(ed_rmt_tp_risk_lag_comp,
                         family = "truncnbinom")
@@ -2203,16 +1971,8 @@ countsummary(ed_rmt_tnb_risk_lag_comp)
 
 compare_nested(ed_rmt_tp_risk_lag_comp, ed_rmt_tnb_risk_lag_comp)
 
-compare_nested(ed_rmt_tnb_risk_pars_lag_comp, ed_rmt_tnb_risk_lag_comp)
 
 ### multilevel
-
-ed_rmt_mtp_risk_pars_lag_comp <- update(ed_rmt_tp_risk_pars_lag_comp,
-                        add_nom)
-
-countsummary(ed_rmt_mtp_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_tp_risk_pars_lag_comp, ed_rmt_mtp_risk_pars_lag_comp)
 
 ed_rmt_mtp_risk_lag_comp <- update(ed_rmt_tp_risk_lag_comp,
                         add_nom)
@@ -2221,77 +1981,18 @@ countsummary(ed_rmt_mtp_risk_lag_comp)
 
 compare_nested(ed_rmt_tp_risk_lag_comp, ed_rmt_mtp_risk_lag_comp)
 
-compare_nested(ed_rmt_mtp_risk_pars_lag_comp, ed_rmt_mtp_risk_lag_comp)
-
-### mtnb
-
-ed_rmt_mtnb_risk_pars_lag_comp <- update(ed_rmt_tnb_risk_pars_lag_comp,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_tnb_risk_pars_lag_comp, ed_rmt_mtnb_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_mtp_risk_pars_lag_comp, ed_rmt_mtnb_risk_pars_lag_comp)
-
-ed_rmt_mtnb_risk_lag_comp <- update(ed_rmt_tnb_risk_lag_comp,
-                        add_nom)
-
-countsummary(ed_rmt_mtnb_risk_lag_comp)
-
-compare_nested(ed_rmt_tnb_risk_lag_comp, ed_rmt_mtnb_risk_lag_comp)
-
-compare_nested(ed_rmt_mtp_risk_lag_comp, ed_rmt_mtnb_risk_lag_comp)
-
-compare_nested(ed_rmt_mtnb_risk_pars_lag_comp, ed_rmt_mtnb_risk_lag_comp)
-
-
 ## significance of risk to lag
 
 compare_nested(ed_rmt_tp_comp, ed_rmt_tp_risk_lag_comp)
-compare_nested(ed_rmt_tp_comp, ed_rmt_tp_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_tnb_comp, ed_rmt_tnb_risk_lag_comp)
-compare_nested(ed_rmt_tnb_comp, ed_rmt_tnb_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_mtp_comp, ed_rmt_mtp_risk_lag_comp)
-compare_nested(ed_rmt_mtp_comp, ed_rmt_mtp_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_mtnb_comp, ed_rmt_mtnb_risk_lag_comp)
-compare_nested(ed_rmt_mtnb_comp, ed_rmt_mtnb_risk_pars_lag_comp)
 
 ## significance of lag to risk
 
 compare_nested(ed_rmt_tp_risk_full, ed_rmt_tp_risk_lag_comp)
-compare_nested(ed_rmt_tp_risk_pars, ed_rmt_tp_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_tnb_risk_full, ed_rmt_tnb_risk_lag_comp)
-compare_nested(ed_rmt_tnb_risk_pars, ed_rmt_tnb_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_mtp_risk_full, ed_rmt_mtp_risk_lag_comp)
-compare_nested(ed_rmt_mtp_risk_pars, ed_rmt_mtp_risk_pars_lag_comp)
-
-compare_nested(ed_rmt_mtnb_risk_full, ed_rmt_mtnb_risk_lag_comp)
-compare_nested(ed_rmt_mtnb_risk_pars, ed_rmt_mtnb_risk_pars_lag_comp)
 
 ## save as csv
 
 coef_csv(ed_rmt_tp_comp)
 coef_csv(ed_rmt_tp_risk_lag_comp)
-coef_csv(ed_rmt_tp_risk_pars_lag_comp)
-
-coef_csv(ed_rmt_tnb_comp)
-coef_csv(ed_rmt_tnb_risk_lag_comp)
-coef_csv(ed_rmt_tnb_risk_pars_lag_comp)
-
-coef_csv(ed_rmt_mtp_comp)
-coef_csv(ed_rmt_mtp_risk_lag_comp)
-coef_csv(ed_rmt_mtp_risk_pars_lag_comp)
-
-coef_csv(ed_rmt_mtnb_comp)
-coef_csv(ed_rmt_mtnb_risk_lag_comp)
-coef_csv(ed_rmt_mtnb_risk_pars_lag_comp)
-
 
 ```
 
