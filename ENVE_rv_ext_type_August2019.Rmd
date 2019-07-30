@@ -646,7 +646,7 @@ Fix business size category.
 ## Time course
 
 
-```{r time-course}
+```{r time-course, fig.width = 7, fig.height = 4}
 
 ## Tables and tests by type
 
@@ -674,7 +674,7 @@ enve_nona %>%
 
 # plots
 
-enve_nona %>%
+(enve_nona %>%
     filter(month < 13) %>%
     filter(extortion_type_wocp != "Other") %>%
     ggplot(aes(month, fill = extortion_type_wocp)) +
@@ -685,9 +685,9 @@ enve_nona %>%
     ggtitle("Extortion incidents (monthly)") +
     facet_wrap(~ extortion_type_wocp, scales = "free_y") +
     scale_fill_manual(values = c("#E69F00", "#0072B2")) +
-    theme(legend.position = "none")
+    theme(legend.position = "none") -> monthly_counts_plot)
 
-ggsave(filename = "figure/monthly_counts_extortion.pdf", width = 7, height = 4)
+ggsave(monthly_counts_plot, filename = "figure/monthly_counts_extortion.pdf", width = 7, height = 4)
 
 
 # events per semester
