@@ -7,10 +7,6 @@ output:
   md_document:
     variant: "markdown"
 pandoc_args: "--smart"
-params:
-    test:
-        label: "Testing (for development)"
-        value: FALSE
 references:
 - id: Estevez-Soto2019
   type: article-journal
